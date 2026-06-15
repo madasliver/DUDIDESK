@@ -1,7 +1,6 @@
 import { loadPrefs, prefs } from "./modules/state";
-import { applyTheme, applyTitle, applyPanelOpacity, setActiveBtn } from "./modules/theme";
+import { applyTheme, applyTitle, applyPanelOpacity, applyResponsiveScale, setActiveBtn } from "./modules/theme";
 import { applyBg } from "./modules/background";
-import { resizePanel } from "./modules/grid";
 import { render } from "./modules/render";
 import { initModal } from "./modules/modal";
 import { initFolder } from "./modules/folder";
@@ -29,7 +28,7 @@ function init(): void {
 
   window.addEventListener("resize", () => {
     applyBg(prefs.bg);
-    resizePanel();
+    applyResponsiveScale();
   });
 }
 
