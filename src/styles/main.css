@@ -3,7 +3,7 @@
   --bg2: #222222;
   --fg: #e8e4d0;
   --fg2: #a09880;
-  --fg3: #504840;
+  --fg3: #cdbaa7;
   --border: #e8e4d0;
   --px: 3px;
   --icon-size: 66px;
@@ -215,7 +215,7 @@ body {
 .sc-item .icon-wrap img { width: var(--icon-img); height: var(--icon-img); object-fit: contain; }
 
 .sc-item .sc-label {
-  font-size: var(--label-size); color: var(--fg3); text-transform: uppercase;
+  font-size: var(--label-size); color: var(--fg2); text-transform: uppercase;
   letter-spacing: .5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   max-width: var(--cell); text-align: center; transition: color .1s;
 }
@@ -255,7 +255,7 @@ body {
   transition: border-color .1s, color .1s, border-style .1s;
 }
 .add-panel-btn:hover .icon-wrap { border-color: var(--border); color: var(--fg); border-style: solid; }
-.add-panel-btn .sc-label { font-size: var(--label-size); color: var(--fg3); text-transform: uppercase; letter-spacing: .5px; }
+.add-panel-btn .sc-label { font-size: var(--label-size); color: var(--fg2); text-transform: uppercase; letter-spacing: .5px; }
 .add-panel-btn:hover .sc-label { color: var(--fg); }
 
 /* ── DRAG GHOST ──────────────────────────────────────────── */
@@ -311,7 +311,7 @@ body {
 .f-item:hover .icon-wrap { border-color: var(--border); }
 .f-item img { width: 22px; height: 22px; object-fit: contain; }
 .f-item .f-label {
-  font-size: 6px; color: var(--fg3); text-transform: uppercase; letter-spacing: .5px;
+  font-size: 6px; color: var(--fg2); text-transform: uppercase; letter-spacing: .5px;
   text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 56px;
 }
 .f-item .f-del {
