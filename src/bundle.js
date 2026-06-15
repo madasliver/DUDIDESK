@@ -422,42 +422,12 @@ function attachDrag(el, item, idx) {
       el.classList.add("dragging");
       showGhost(item, sx, sy);
     }, LONG_PRESS_MS2);
-    let deleteTimer = null;
-    if (window.innerWidth <= 480) {
-      deleteTimer = window.setTimeout(() => {
-        if (lpTimer !== null) {
-          clearTimeout(lpTimer);
-          lpTimer = null;
-        }
-        if (dragging) {
-          dragging.el.classList.remove("dragging");
-          dragging = null;
-          hideGhost();
-        }
-        document.removeEventListener("pointermove", onMove);
-        document.removeEventListener("pointerup", onUp);
-        document.removeEventListener("pointercancel", onUp);
-        if ("vibrate" in navigator) navigator.vibrate(150);
-        const l = loadShortcuts();
-        l.splice(idx, 1);
-        saveShortcuts(l);
-        render();
-      }, 5e3);
-    }
     function onMove(ev) {
       if (!dragging) {
         if (Math.abs(ev.clientX - sx) > 6 || Math.abs(ev.clientY - sy) > 6) {
           if (lpTimer !== null) clearTimeout(lpTimer);
-          if (deleteTimer !== null) {
-            clearTimeout(deleteTimer);
-            deleteTimer = null;
-          }
         }
         return;
-      }
-      if (deleteTimer !== null) {
-        clearTimeout(deleteTimer);
-        deleteTimer = null;
       }
       placeGhost(ev.clientX, ev.clientY);
       const tabEl = getTabElAt(ev.clientX, ev.clientY);
@@ -490,10 +460,6 @@ function attachDrag(el, item, idx) {
     }
     function onUp(ev) {
       if (lpTimer !== null) clearTimeout(lpTimer);
-      if (deleteTimer !== null) {
-        clearTimeout(deleteTimer);
-        deleteTimer = null;
-      }
       document.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerup", onUp);
       document.removeEventListener("pointercancel", onUp);

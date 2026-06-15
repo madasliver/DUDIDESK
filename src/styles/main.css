@@ -382,7 +382,7 @@ body {
     height: auto !important;
   }
   .sc-item {
-    position: static !important;
+    position: relative !important;
     left: auto !important;
     top: auto !important;
     width: 100% !important;
@@ -395,5 +395,12 @@ body {
   }
   .sc-item .icon-wrap img { width: 50% !important; height: 50% !important; }
   .sc-item .sc-label { max-width: 100% !important; font-size: 6px !important; }
-  .sc-item .del-btn { right: 0; }
+  .sc-item .del-btn {
+    display: flex !important;
+    top: -6px;
+    right: -6px;
+    width: 20px;
+    height: 20px;
+    font-size: 9px;
+  }
 }
