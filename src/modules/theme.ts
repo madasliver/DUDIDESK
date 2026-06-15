@@ -7,7 +7,9 @@ import { prefs } from "./state";
 
 const PANEL_PAD = 50;
 const VIEWPORT_MARGIN = 24;
-const MIN_SCALE = 0.35;
+// Sanity floor only (never binds on real screens) — keeps grid width == avail exactly,
+// so the panel's max-width never clips .icon-grid and icons can't overflow it.
+const MIN_SCALE = 0.1;
 
 export function applyTheme(mode: ModeId, size: SizeId): void {
   const t = THEMES[mode];

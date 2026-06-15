@@ -891,7 +891,7 @@ function applyBg(type) {
 // src/modules/theme.ts
 var PANEL_PAD = 50;
 var VIEWPORT_MARGIN = 24;
-var MIN_SCALE = 0.35;
+var MIN_SCALE = 0.1;
 function applyTheme(mode, size) {
   const t = THEMES[mode];
   const s = SIZES[size];
