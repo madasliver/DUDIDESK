@@ -356,9 +356,44 @@ body {
 
 /* ── MOBILE ──────────────────────────────────────────────── */
 @media (max-width: 480px) {
-  body { gap: 16px; }
+  body { gap: 16px; padding-top: 60px; justify-content: flex-start; }
   .wordmark { font-size: clamp(15px, 7vw, 28px); }
   .topbar { padding: 8px 10px; }
   .settings-btn, .quicklink { font-size: 6px; padding: 6px 7px; }
   .quicklinks { gap: 4px; }
+  .search-btn { display: none; }
+
+  /* Icon panel: scrollable glass window, 4-column grid */
+  .icon-panel {
+    padding: 16px !important;
+    width: calc(100vw - 32px) !important;
+    max-width: none !important;
+    max-height: 55vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  .icon-panel-wrap { margin-top: 0; }
+  .icon-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 14px !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+  .sc-item {
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    width: 100% !important;
+  }
+  .sc-item .icon-wrap,
+  .sc-item .folder-wrap {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 1;
+  }
+  .sc-item .icon-wrap img { width: 50% !important; height: 50% !important; }
+  .sc-item .sc-label { max-width: 100% !important; font-size: 6px !important; }
+  .sc-item .del-btn { right: 0; }
 }

@@ -411,6 +411,7 @@ function mergeFolder(srcIdx, tgtIdx) {
 function attachDrag(el, item, idx) {
   let lpTimer = null;
   el.addEventListener("pointerdown", (e) => {
+    if (window.innerWidth <= 480) return;
     if (e.button !== 0 || e.target.closest(".del-btn")) return;
     e.preventDefault();
     const sx = e.clientX;
@@ -517,8 +518,8 @@ function render() {
   panel.innerHTML = "";
   const list = loadShortcuts();
   const activeTab = getActiveTab();
-  list.forEach((item, idx) => {
-    if (tabOf(item) !== activeTab) return;
+  const visible = list.map((item, idx) => ({ item, idx })).filter(({ item }) => tabOf(item) === activeTab).sort((a, b) => a.item.row - b.item.row || a.item.col - b.item.col);
+  visible.forEach(({ item, idx }) => {
     const el = item.type === "folder" ? makeFolderEl(item, idx) : makeScItem(item, idx);
     const { x, y } = cellToXY(item.col || 0, item.row || 0);
     el.style.left = x + "px";

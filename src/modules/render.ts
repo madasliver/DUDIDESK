@@ -12,11 +12,14 @@ export function render(): void {
   panel.innerHTML = "";
   const list = loadShortcuts();
   const activeTab = getActiveTab();
-  list.forEach((item, idx) => {
-    if (tabOf(item) !== activeTab) return;
+  const visible = list
+    .map((item, idx) => ({ item, idx }))
+    .filter(({ item }) => tabOf(item) === activeTab)
+    .sort((a, b) => (a.item.row - b.item.row) || (a.item.col - b.item.col));
+  visible.forEach(({ item, idx }) => {
     const el = item.type === "folder"
-      ? makeFolderEl(item, idx)
-      : makeScItem(item, idx);
+      ? makeFolderEl(item as FolderItem, idx)
+      : makeScItem(item as LinkItem, idx);
     const { x, y } = cellToXY(item.col || 0, item.row || 0);
     el.style.left = x + "px";
     el.style.top = y + "px";

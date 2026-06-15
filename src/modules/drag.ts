@@ -170,6 +170,7 @@ export function attachDrag(el: HTMLElement, item: Item, idx: number): void {
   let lpTimer: number | null = null;
 
   el.addEventListener("pointerdown", e => {
+    if (window.innerWidth <= 480) return;
     if (e.button !== 0 || (e.target as HTMLElement).closest(".del-btn")) return;
     e.preventDefault();
     const sx = e.clientX;
