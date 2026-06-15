@@ -3,7 +3,7 @@ import { loadShortcuts } from "./state";
 import { getActiveTab, itemsInTab } from "./tabs";
 
 export const COLS = 10;
-const MIN_ROWS = 4;
+const MIN_ROWS = 2;
 
 function getCSVar(name: string): number {
   return parseInt(
@@ -43,7 +43,7 @@ export function freeCell(list: Item[]): CellPos {
 export function panelRows(): number {
   const list = itemsInTab(loadShortcuts(), getActiveTab());
   const maxRow = list.reduce((m, i) => Math.max(m, i.row), 0);
-  return Math.max(MIN_ROWS, maxRow + 2);
+  return Math.max(MIN_ROWS, maxRow + 1);
 }
 
 export function resizePanel(): void {
