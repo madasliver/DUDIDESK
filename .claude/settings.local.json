@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($tmp = \"C:\\\\Users\\\\adamm\\\\AppData\\\\Local\\\\Temp\\\\dudidesk-edge-profile\"; Remove-Item -Recurse -Force $tmp -ErrorAction SilentlyContinue; Start-Process -FilePath \"C:\\\\Program Files \\(x86\\)\\\\Microsoft\\\\Edge\\\\Application\\\\msedge.exe\" -ArgumentList \"--headless=new\",\"--disable-gpu\",\"--remote-debugging-port=9222\",\"--user-data-dir=$tmp\",\"--no-first-run\",\"--no-default-browser-check\" ; Start-Sleep -Seconds 2; \\(Invoke-WebRequest -Uri \"http://localhost:9222/json/version\" -UseBasicParsing\\).Content)"
+    ]
+  }
+}
