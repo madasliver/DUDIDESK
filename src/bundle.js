@@ -1328,7 +1328,8 @@ function initNotes() {
 }
 
 // src/modules/suggestions.ts
-var SUGGEST_URL = "https://duckduckgo.com/ac/?type=list&q=";
+var SUGGEST_BASE = "https://suggestqueries.google.com/complete/search?client=firefox&q=";
+var CORS_PROXY = "https://corsproxy.io/?url=";
 var MAX = 6;
 function initSuggestions() {
   const formEl = document.querySelector(".search-panel");
@@ -1382,7 +1383,8 @@ function initSuggestions() {
   }
   async function fetchSuggestions(q) {
     try {
-      const res = await fetch(SUGGEST_URL + encodeURIComponent(q));
+      const target = SUGGEST_BASE + encodeURIComponent(q);
+      const res = await fetch(CORS_PROXY + encodeURIComponent(target));
       const data = await res.json();
       const list = Array.isArray(data[1]) ? data[1] : [];
       if (input.value.trim()) render2(list);

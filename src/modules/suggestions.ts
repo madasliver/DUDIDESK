@@ -1,4 +1,6 @@
-const SUGGEST_URL = "https://duckduckgo.com/ac/?type=list&q=";
+const SUGGEST_BASE =
+  "https://suggestqueries.google.com/complete/search?client=firefox&q=";
+const CORS_PROXY = "https://corsproxy.io/?url=";
 const MAX = 6;
 
 export function initSuggestions(): void {
@@ -54,7 +56,8 @@ export function initSuggestions(): void {
 
   async function fetchSuggestions(q: string): Promise<void> {
     try {
-      const res = await fetch(SUGGEST_URL + encodeURIComponent(q));
+      const target = SUGGEST_BASE + encodeURIComponent(q);
+      const res = await fetch(CORS_PROXY + encodeURIComponent(target));
       const data = await res.json() as unknown[];
       const list = Array.isArray(data[1]) ? (data[1] as string[]) : [];
       if (input.value.trim()) render(list);
