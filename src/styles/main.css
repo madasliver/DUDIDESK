@@ -377,7 +377,8 @@ body {
   .icon-grid {
     display: grid !important;
     grid-template-columns: repeat(4, 1fr) !important;
-    gap: 14px !important;
+    row-gap: 20px !important;
+    column-gap: 14px !important;
     width: 100% !important;
     height: auto !important;
   }
