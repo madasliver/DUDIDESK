@@ -1185,6 +1185,7 @@ function initTodo() {
   const input = document.getElementById("todoInput");
   const addBtn = document.getElementById("todoAddBtn");
   if (!btn || !panel) return;
+  panel.addEventListener("click", (e) => e.stopPropagation());
   btn.addEventListener("click", (e) => {
     e.stopPropagation();
     const opening = !panel.classList.contains("open");
@@ -1299,6 +1300,7 @@ function initNotes() {
   const panel = document.getElementById("notesPanel");
   const textarea = document.getElementById("notesTextarea");
   if (!btn || !panel || !textarea) return;
+  panel.addEventListener("click", (e) => e.stopPropagation());
   let state = loadNotes();
   btn.addEventListener("click", (e) => {
     e.stopPropagation();

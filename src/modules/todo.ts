@@ -67,6 +67,8 @@ export function initTodo(): void {
   const addBtn = document.getElementById("todoAddBtn");
   if (!btn || !panel) return;
 
+  panel.addEventListener("click", e => e.stopPropagation());
+
   btn.addEventListener("click", e => {
     e.stopPropagation();
     const opening = !panel.classList.contains("open");

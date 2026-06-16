@@ -104,6 +104,8 @@ export function initNotes(): void {
   const textarea = document.getElementById("notesTextarea") as HTMLTextAreaElement | null;
   if (!btn || !panel || !textarea) return;
 
+  panel.addEventListener("click", e => e.stopPropagation());
+
   let state = loadNotes();
 
   btn.addEventListener("click", e => {
