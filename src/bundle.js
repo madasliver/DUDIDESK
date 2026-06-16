@@ -1327,6 +1327,96 @@ function initNotes() {
   });
 }
 
+// src/modules/suggestions.ts
+var SUGGEST_URL = "https://suggestqueries.google.com/complete/search?client=firefox&q=";
+var MAX = 6;
+function initSuggestions() {
+  const formEl = document.querySelector(".search-panel");
+  const inputEl = formEl?.querySelector("input[name=q]");
+  if (!formEl || !inputEl) return;
+  const form = formEl;
+  const input = inputEl;
+  const dropdown2 = document.createElement("div");
+  dropdown2.className = "sug-dropdown";
+  form.appendChild(dropdown2);
+  let timer = 0;
+  let activeIdx = -1;
+  let suggestions = [];
+  function close() {
+    dropdown2.innerHTML = "";
+    dropdown2.classList.remove("open");
+    activeIdx = -1;
+    suggestions = [];
+  }
+  function setActive(idx) {
+    dropdown2.querySelectorAll(".sug-item").forEach(
+      (el, i) => el.classList.toggle("active", i === idx)
+    );
+    activeIdx = idx;
+  }
+  function submit(value) {
+    input.value = value;
+    close();
+    form.requestSubmit();
+  }
+  function render2(list) {
+    suggestions = list.slice(0, MAX);
+    activeIdx = -1;
+    dropdown2.innerHTML = "";
+    if (!suggestions.length) {
+      dropdown2.classList.remove("open");
+      return;
+    }
+    suggestions.forEach((sug, i) => {
+      const el = document.createElement("div");
+      el.className = "sug-item";
+      el.textContent = sug;
+      el.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        submit(sug);
+      });
+      el.addEventListener("mouseover", () => setActive(i));
+      dropdown2.appendChild(el);
+    });
+    dropdown2.classList.add("open");
+  }
+  async function fetchSuggestions(q) {
+    try {
+      const res = await fetch(SUGGEST_URL + encodeURIComponent(q));
+      const data = await res.json();
+      const list = Array.isArray(data[1]) ? data[1] : [];
+      if (input.value.trim()) render2(list);
+    } catch {
+      close();
+    }
+  }
+  input.addEventListener("input", () => {
+    clearTimeout(timer);
+    const q = input.value.trim();
+    if (!q) {
+      close();
+      return;
+    }
+    timer = window.setTimeout(() => void fetchSuggestions(q), 300);
+  });
+  input.addEventListener("keydown", (e) => {
+    if (!suggestions.length) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActive(Math.min(activeIdx + 1, suggestions.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActive(Math.max(activeIdx - 1, -1));
+    } else if (e.key === "Escape") {
+      close();
+    } else if (e.key === "Enter" && activeIdx >= 0) {
+      e.preventDefault();
+      submit(suggestions[activeIdx]);
+    }
+  });
+  input.addEventListener("blur", () => setTimeout(close, 150));
+}
+
 // src/main.ts
 function init() {
   loadPrefs();
@@ -1344,6 +1434,7 @@ function init() {
   initWeather();
   initTodo();
   initNotes();
+  initSuggestions();
   requestAnimationFrame(() => {
     applyBg(prefs.bg);
     applyPanelOpacity(prefs.opacity);
