@@ -1328,7 +1328,7 @@ function initNotes() {
 }
 
 // src/modules/suggestions.ts
-var SUGGEST_URL = "https://suggestqueries.google.com/complete/search?client=firefox&q=";
+var SUGGEST_URL = "https://duckduckgo.com/ac/?type=list&q=";
 var MAX = 6;
 function initSuggestions() {
   const formEl = document.querySelector(".search-panel");

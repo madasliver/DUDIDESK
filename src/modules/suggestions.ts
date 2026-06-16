@@ -1,5 +1,4 @@
-const SUGGEST_URL =
-  "https://suggestqueries.google.com/complete/search?client=firefox&q=";
+const SUGGEST_URL = "https://duckduckgo.com/ac/?type=list&q=";
 const MAX = 6;
 
 export function initSuggestions(): void {
