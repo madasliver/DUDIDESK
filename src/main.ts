@@ -6,6 +6,8 @@ import { initModal } from "./modules/modal";
 import { initFolder } from "./modules/folder";
 import { initSettings } from "./modules/settings";
 import { initTabs } from "./modules/tabs";
+import { initClock } from "./modules/clock";
+import { initWeather } from "./modules/weather";
 
 function init(): void {
   loadPrefs();
@@ -20,6 +22,8 @@ function init(): void {
   initFolder();
   initTabs();
   render();
+  initClock();
+  initWeather();
 
   requestAnimationFrame(() => {
     applyBg(prefs.bg);
