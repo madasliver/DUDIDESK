@@ -8,6 +8,8 @@ import { initSettings } from "./modules/settings";
 import { initTabs } from "./modules/tabs";
 import { initClock } from "./modules/clock";
 import { initWeather } from "./modules/weather";
+import { initTodo } from "./modules/todo";
+import { initNotes } from "./modules/notes";
 
 function init(): void {
   loadPrefs();
@@ -24,6 +26,8 @@ function init(): void {
   render();
   initClock();
   initWeather();
+  initTodo();
+  initNotes();
 
   requestAnimationFrame(() => {
     applyBg(prefs.bg);

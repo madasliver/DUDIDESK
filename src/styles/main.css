@@ -371,6 +371,125 @@ body {
 .btn-add { background: var(--fg); border-color: var(--fg); color: var(--bg); }
 .btn-add:hover { background: var(--fg2); border-color: var(--fg2); }
 
+/* ── BOTTOM DOCK (TODO + NOTES) ─────────────────────────── */
+.bw-dock {
+  position: fixed; bottom: 16px; right: 16px;
+  display: flex; gap: 8px; align-items: flex-end; z-index: 250;
+}
+.bw-item { position: relative; display: flex; flex-direction: column; align-items: flex-end; }
+
+.bw-btn {
+  background: var(--bg2); border: var(--px) solid var(--fg3); color: var(--fg2);
+  font-family: 'Press Start 2P', monospace; font-size: 7px; padding: 8px 11px;
+  cursor: pointer; letter-spacing: 1px; white-space: nowrap;
+  transition: border-color .1s, color .1s;
+}
+.bw-btn:hover { border-color: var(--border); color: var(--fg); }
+
+.bw-panel {
+  display: none; position: absolute; bottom: calc(100% + 8px); right: 0;
+  background: var(--bg); border: var(--px) solid var(--border);
+  min-width: 280px; max-width: calc(100vw - 32px);
+}
+.bw-panel.open { display: flex; flex-direction: column; }
+
+.bw-panel-header {
+  font-size: 7px; letter-spacing: 2px; color: var(--fg3);
+  padding: 10px 12px; border-bottom: var(--px) solid var(--fg3); flex-shrink: 0;
+}
+
+/* TODO */
+.todo-list {
+  overflow-y: auto; max-height: 300px;
+  display: flex; flex-direction: column; scrollbar-width: thin;
+}
+.todo-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border-bottom: 1px solid var(--bg2); flex-shrink: 0;
+}
+.todo-item.done .todo-text { color: var(--fg3); text-decoration: line-through; }
+.todo-check {
+  width: 14px; height: 14px; flex-shrink: 0;
+  border: var(--px) solid var(--fg3); background: transparent; color: var(--fg);
+  font-size: 7px; font-family: 'Press Start 2P', monospace;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
+  transition: border-color .1s, background .1s;
+}
+.todo-item.done .todo-check { background: var(--fg3); color: var(--bg); border-color: var(--fg3); }
+.todo-check:hover { border-color: var(--border); }
+.todo-text {
+  flex: 1; font-size: 6px; color: var(--fg); letter-spacing: .5px;
+  line-height: 1.6; word-break: break-word;
+}
+.todo-del {
+  width: 12px; height: 12px; flex-shrink: 0; opacity: 0;
+  border: var(--px) solid var(--fg3); background: transparent; color: var(--fg3);
+  font-size: 10px; font-family: 'Press Start 2P', monospace; cursor: pointer; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity .1s, border-color .1s, color .1s;
+}
+.todo-item:hover .todo-del { opacity: 1; }
+.todo-del:hover { border-color: var(--fg); color: var(--fg); }
+.todo-add-row {
+  display: flex; border-top: var(--px) solid var(--fg3); flex-shrink: 0;
+}
+.todo-add-row input {
+  flex: 1; background: var(--bg2); border: none; outline: none;
+  color: var(--fg); font-family: 'Press Start 2P', monospace;
+  font-size: 6px; padding: 9px 10px; caret-color: var(--fg); letter-spacing: .5px;
+}
+.todo-add-row input::placeholder { color: var(--fg3); }
+.todo-add-row button {
+  background: var(--fg); border: none; border-left: var(--px) solid var(--border);
+  color: var(--bg); font-family: 'Press Start 2P', monospace;
+  font-size: 7px; padding: 0 10px; cursor: pointer; white-space: nowrap;
+}
+.todo-add-row button:hover { background: var(--fg2); }
+
+/* NOTES */
+.notes-panel { width: 380px; }
+.notes-tabs-bar {
+  display: flex; border-bottom: var(--px) solid var(--fg3);
+  overflow-x: auto; scrollbar-width: thin; flex-shrink: 0;
+}
+.note-tab {
+  position: relative;
+  background: transparent; border-right: var(--px) solid var(--fg3);
+  color: var(--fg3); font-family: 'Press Start 2P', monospace;
+  font-size: 6px; padding: 8px 10px; cursor: pointer; white-space: nowrap;
+  letter-spacing: .5px; display: flex; align-items: center; gap: 5px;
+  transition: color .1s, background .1s; flex-shrink: 0; user-select: none;
+}
+.note-tab:hover { color: var(--fg2); background: var(--bg2); }
+.note-tab.active { background: var(--bg2); color: var(--fg); }
+.note-tab-del {
+  width: 10px; height: 10px; flex-shrink: 0; opacity: 0;
+  border: none; background: transparent; color: var(--fg3);
+  font-size: 12px; cursor: pointer; padding: 0; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity .1s, color .1s;
+}
+.note-tab:hover .note-tab-del { opacity: 1; }
+.note-tab-del:hover { color: var(--fg); }
+.note-tab-add {
+  background: transparent; border: none; color: var(--fg3);
+  font-family: 'Press Start 2P', monospace; font-size: 12px; padding: 6px 10px;
+  cursor: pointer; flex-shrink: 0; transition: color .1s;
+}
+.note-tab-add:hover { color: var(--fg); }
+.note-tab-rename {
+  background: var(--bg); border: var(--px) solid var(--border); color: var(--fg);
+  font-family: 'Press Start 2P', monospace; font-size: 6px; padding: 8px 6px;
+  outline: none; caret-color: var(--fg); letter-spacing: .5px; width: 80px; flex-shrink: 0;
+}
+.notes-textarea {
+  width: 100%; height: 240px; background: var(--bg2); border: none; outline: none;
+  color: var(--fg); font-family: 'Press Start 2P', monospace; font-size: 7px;
+  padding: 12px; resize: none; caret-color: var(--fg); letter-spacing: .5px; line-height: 2;
+  scrollbar-width: thin;
+}
+.notes-textarea::placeholder { color: var(--fg3); }
+
 /* ── MOBILE ──────────────────────────────────────────────── */
 @media (max-width: 480px) {
   body { gap: 16px; padding-top: 60px; justify-content: flex-start; }

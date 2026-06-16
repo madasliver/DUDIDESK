@@ -127,6 +127,28 @@
     </div>
   </div>
 
+  <!-- Bottom-right dock: TODO + NOTES -->
+  <div class="bw-dock">
+    <div class="bw-item">
+      <div class="bw-panel" id="todoPanel">
+        <div class="bw-panel-header">// TO DO</div>
+        <div class="todo-list" id="todoList"></div>
+        <div class="todo-add-row">
+          <input type="text" id="todoInput" placeholder="NEW TASK..." maxlength="60" autocomplete="off" />
+          <button id="todoAddBtn">[ + ]</button>
+        </div>
+      </div>
+      <button class="bw-btn" id="todoBtn">TO DO!</button>
+    </div>
+    <div class="bw-item">
+      <div class="bw-panel notes-panel" id="notesPanel">
+        <div class="notes-tabs-bar" id="notesTabsBar"></div>
+        <textarea class="notes-textarea" id="notesTextarea" placeholder="..."></textarea>
+      </div>
+      <button class="bw-btn" id="notesBtn">NOTES</button>
+    </div>
+  </div>
+
   <div id="dragGhost"></div>
 
   <script type="module" src="/src/bundle.js"></script>
