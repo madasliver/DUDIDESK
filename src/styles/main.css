@@ -216,7 +216,7 @@ body {
 /* each icon is absolutely positioned inside .icon-grid */
 .sc-item {
   position: absolute;
-  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
   cursor: grab; width: var(--cell);
   transition: opacity .15s;
   touch-action: none;
@@ -389,20 +389,35 @@ body {
 .bw-panel {
   display: none; position: absolute; bottom: calc(100% + 8px); right: 0;
   background: var(--bg2); border: var(--px) solid var(--border);
-  min-width: 340px; max-width: calc(100vw - 32px);
+  min-width: 380px; max-width: calc(100vw - 32px);
 }
 .bw-panel.open { display: flex; flex-direction: column; }
+.bw-panel.bw-sz-s { min-width: 300px; }
+.bw-panel.bw-sz-l { min-width: 480px; }
 
 .bw-panel-header {
   font-size: 7px; letter-spacing: 2px; color: var(--fg);
   padding: 10px 12px; border-bottom: var(--px) solid var(--fg2); flex-shrink: 0;
+  display: flex; justify-content: space-between; align-items: center;
 }
+.bw-resize-btns { display: flex; gap: 4px; }
+.bw-resize-btn {
+  background: transparent; border: var(--px) solid var(--fg3); color: var(--fg3);
+  font-family: 'Press Start 2P', monospace; font-size: 9px;
+  width: 18px; height: 18px; cursor: pointer; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color .1s, color .1s;
+}
+.bw-resize-btn:hover { border-color: var(--fg); color: var(--fg); }
+.bw-resize-btn:disabled { opacity: 0.3; cursor: default; }
 
 /* TODO */
 .todo-list {
-  overflow-y: auto; max-height: 380px;
+  overflow-y: auto; max-height: 440px;
   display: flex; flex-direction: column; scrollbar-width: thin;
 }
+.bw-sz-s .todo-list { max-height: 260px; }
+.bw-sz-l .todo-list { max-height: 620px; }
 .todo-item {
   display: flex; align-items: center; gap: 8px;
   padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.07); flex-shrink: 0;
@@ -447,7 +462,9 @@ body {
 .todo-add-row button:hover { background: var(--fg2); }
 
 /* NOTES */
-.notes-panel { width: 460px; }
+.notes-panel { width: 520px; }
+.notes-panel.bw-sz-s { width: 360px; }
+.notes-panel.bw-sz-l { width: 680px; }
 .notes-tabs-bar {
   display: flex; border-bottom: var(--px) solid var(--fg3);
   overflow-x: auto; scrollbar-width: thin; flex-shrink: 0;
@@ -483,11 +500,13 @@ body {
   outline: none; caret-color: var(--fg); letter-spacing: .5px; width: 80px; flex-shrink: 0;
 }
 .notes-textarea {
-  width: 100%; height: 300px; background: var(--bg); border: none; outline: none;
+  width: 100%; height: 380px; background: var(--bg); border: none; outline: none;
   color: var(--fg); font-family: 'Press Start 2P', monospace; font-size: 7px;
   padding: 12px; resize: none; caret-color: var(--fg); letter-spacing: .5px; line-height: 2;
   scrollbar-width: thin;
 }
+.bw-sz-s .notes-textarea { height: 220px; }
+.bw-sz-l .notes-textarea { height: 560px; }
 .notes-textarea::placeholder { color: var(--fg3); }
 
 /* ── MOBILE ──────────────────────────────────────────────── */

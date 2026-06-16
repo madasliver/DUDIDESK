@@ -106,6 +106,41 @@ export function initNotes(): void {
 
   panel.addEventListener("click", e => e.stopPropagation());
 
+  const notesHeader = document.createElement("div");
+  notesHeader.className = "bw-panel-header";
+  notesHeader.textContent = "// NOTES";
+  panel.prepend(notesHeader);
+
+  // reuse resize logic from todo module via shared helper isn't imported — inline it
+  {
+    const PANEL_SIZES_N = ["bw-sz-s", "bw-sz-m", "bw-sz-l"] as const;
+    let szIdx = 1;
+    panel.classList.add(PANEL_SIZES_N[szIdx]);
+
+    const wrap = document.createElement("div");
+    wrap.className = "bw-resize-btns";
+    const minus = document.createElement("button");
+    minus.className = "bw-resize-btn";
+    minus.textContent = "−";
+    (minus as HTMLButtonElement).disabled = true;
+    const plus = document.createElement("button");
+    plus.className = "bw-resize-btn";
+    plus.textContent = "+";
+
+    const apply = (delta: number): void => {
+      panel.classList.remove(PANEL_SIZES_N[szIdx]);
+      szIdx = Math.max(0, Math.min(PANEL_SIZES_N.length - 1, szIdx + delta));
+      panel.classList.add(PANEL_SIZES_N[szIdx]);
+      (minus as HTMLButtonElement).disabled = szIdx === 0;
+      (plus as HTMLButtonElement).disabled = szIdx === PANEL_SIZES_N.length - 1;
+    };
+    minus.addEventListener("click", e => { e.stopPropagation(); apply(-1); });
+    plus.addEventListener("click", e => { e.stopPropagation(); apply(1); });
+    wrap.appendChild(minus);
+    wrap.appendChild(plus);
+    notesHeader.appendChild(wrap);
+  }
+
   let state = loadNotes();
 
   btn.addEventListener("click", e => {

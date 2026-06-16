@@ -60,6 +60,41 @@ function addTodo(text: string): void {
   renderTodos();
 }
 
+const PANEL_SIZES = ["bw-sz-s", "bw-sz-m", "bw-sz-l"] as const;
+
+function injectResizeBtns(panel: HTMLElement, headerSel: string): void {
+  const header = panel.querySelector(headerSel);
+  if (!header) return;
+  let szIdx = 1;
+  panel.classList.add(PANEL_SIZES[szIdx]);
+
+  const wrap = document.createElement("div");
+  wrap.className = "bw-resize-btns";
+
+  const minus = document.createElement("button");
+  minus.className = "bw-resize-btn";
+  minus.textContent = "−";
+  (minus as HTMLButtonElement).disabled = true;
+
+  const plus = document.createElement("button");
+  plus.className = "bw-resize-btn";
+  plus.textContent = "+";
+
+  const apply = (delta: number): void => {
+    panel.classList.remove(PANEL_SIZES[szIdx]);
+    szIdx = Math.max(0, Math.min(PANEL_SIZES.length - 1, szIdx + delta));
+    panel.classList.add(PANEL_SIZES[szIdx]);
+    (minus as HTMLButtonElement).disabled = szIdx === 0;
+    (plus as HTMLButtonElement).disabled = szIdx === PANEL_SIZES.length - 1;
+  };
+
+  minus.addEventListener("click", e => { e.stopPropagation(); apply(-1); });
+  plus.addEventListener("click", e => { e.stopPropagation(); apply(1); });
+  wrap.appendChild(minus);
+  wrap.appendChild(plus);
+  header.appendChild(wrap);
+}
+
 export function initTodo(): void {
   const btn = document.getElementById("todoBtn");
   const panel = document.getElementById("todoPanel");
@@ -68,6 +103,7 @@ export function initTodo(): void {
   if (!btn || !panel) return;
 
   panel.addEventListener("click", e => e.stopPropagation());
+  injectResizeBtns(panel, ".bw-panel-header");
 
   btn.addEventListener("click", e => {
     e.stopPropagation();

@@ -81,10 +81,10 @@ var FOLDER_COLORS = [
 
 // src/modules/sizes.ts
 var SIZES = {
-  s: { icon: "54px", img: "26px", label: "6px", search: "8px", pad: "11px", word: "22px", sw: "460px", cell: "78px" },
-  m: { icon: "66px", img: "32px", label: "7px", search: "9px", pad: "13px", word: "28px", sw: "540px", cell: "90px" },
-  l: { icon: "80px", img: "40px", label: "8px", search: "10px", pad: "15px", word: "34px", sw: "600px", cell: "106px" },
-  xl: { icon: "96px", img: "50px", label: "9px", search: "11px", pad: "18px", word: "40px", sw: "660px", cell: "124px" }
+  s: { icon: "54px", img: "26px", label: "7px", search: "8px", pad: "11px", word: "22px", sw: "460px", cell: "78px" },
+  m: { icon: "66px", img: "32px", label: "8px", search: "9px", pad: "13px", word: "28px", sw: "540px", cell: "90px" },
+  l: { icon: "80px", img: "40px", label: "9px", search: "10px", pad: "15px", word: "34px", sw: "600px", cell: "106px" },
+  xl: { icon: "96px", img: "50px", label: "10px", search: "11px", pad: "18px", word: "40px", sw: "660px", cell: "124px" }
 };
 
 // src/modules/folder.ts
@@ -529,6 +529,8 @@ function render() {
 function makeScItem(item, idx) {
   const el = document.createElement("a");
   el.href = item.url;
+  el.target = "_blank";
+  el.rel = "noopener noreferrer";
   el.className = "sc-item";
   el.dataset.idx = String(idx);
   el.innerHTML = `
@@ -1179,6 +1181,40 @@ function addTodo(text) {
   saveTodos(all);
   renderTodos();
 }
+var PANEL_SIZES = ["bw-sz-s", "bw-sz-m", "bw-sz-l"];
+function injectResizeBtns(panel, headerSel) {
+  const header = panel.querySelector(headerSel);
+  if (!header) return;
+  let szIdx = 1;
+  panel.classList.add(PANEL_SIZES[szIdx]);
+  const wrap = document.createElement("div");
+  wrap.className = "bw-resize-btns";
+  const minus = document.createElement("button");
+  minus.className = "bw-resize-btn";
+  minus.textContent = "\u2212";
+  minus.disabled = true;
+  const plus = document.createElement("button");
+  plus.className = "bw-resize-btn";
+  plus.textContent = "+";
+  const apply = (delta) => {
+    panel.classList.remove(PANEL_SIZES[szIdx]);
+    szIdx = Math.max(0, Math.min(PANEL_SIZES.length - 1, szIdx + delta));
+    panel.classList.add(PANEL_SIZES[szIdx]);
+    minus.disabled = szIdx === 0;
+    plus.disabled = szIdx === PANEL_SIZES.length - 1;
+  };
+  minus.addEventListener("click", (e) => {
+    e.stopPropagation();
+    apply(-1);
+  });
+  plus.addEventListener("click", (e) => {
+    e.stopPropagation();
+    apply(1);
+  });
+  wrap.appendChild(minus);
+  wrap.appendChild(plus);
+  header.appendChild(wrap);
+}
 function initTodo() {
   const btn = document.getElementById("todoBtn");
   const panel = document.getElementById("todoPanel");
@@ -1186,6 +1222,7 @@ function initTodo() {
   const addBtn = document.getElementById("todoAddBtn");
   if (!btn || !panel) return;
   panel.addEventListener("click", (e) => e.stopPropagation());
+  injectResizeBtns(panel, ".bw-panel-header");
   btn.addEventListener("click", (e) => {
     e.stopPropagation();
     const opening = !panel.classList.contains("open");
@@ -1301,6 +1338,42 @@ function initNotes() {
   const textarea = document.getElementById("notesTextarea");
   if (!btn || !panel || !textarea) return;
   panel.addEventListener("click", (e) => e.stopPropagation());
+  const notesHeader = document.createElement("div");
+  notesHeader.className = "bw-panel-header";
+  notesHeader.textContent = "// NOTES";
+  panel.prepend(notesHeader);
+  {
+    const PANEL_SIZES_N = ["bw-sz-s", "bw-sz-m", "bw-sz-l"];
+    let szIdx = 1;
+    panel.classList.add(PANEL_SIZES_N[szIdx]);
+    const wrap = document.createElement("div");
+    wrap.className = "bw-resize-btns";
+    const minus = document.createElement("button");
+    minus.className = "bw-resize-btn";
+    minus.textContent = "\u2212";
+    minus.disabled = true;
+    const plus = document.createElement("button");
+    plus.className = "bw-resize-btn";
+    plus.textContent = "+";
+    const apply = (delta) => {
+      panel.classList.remove(PANEL_SIZES_N[szIdx]);
+      szIdx = Math.max(0, Math.min(PANEL_SIZES_N.length - 1, szIdx + delta));
+      panel.classList.add(PANEL_SIZES_N[szIdx]);
+      minus.disabled = szIdx === 0;
+      plus.disabled = szIdx === PANEL_SIZES_N.length - 1;
+    };
+    minus.addEventListener("click", (e) => {
+      e.stopPropagation();
+      apply(-1);
+    });
+    plus.addEventListener("click", (e) => {
+      e.stopPropagation();
+      apply(1);
+    });
+    wrap.appendChild(minus);
+    wrap.appendChild(plus);
+    notesHeader.appendChild(wrap);
+  }
   let state = loadNotes();
   btn.addEventListener("click", (e) => {
     e.stopPropagation();
