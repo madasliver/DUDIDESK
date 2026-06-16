@@ -388,14 +388,14 @@ body {
 
 .bw-panel {
   display: none; position: absolute; bottom: calc(100% + 8px); right: 0;
-  background: var(--bg); border: var(--px) solid var(--border);
+  background: var(--bg2); border: var(--px) solid var(--border);
   min-width: 340px; max-width: calc(100vw - 32px);
 }
 .bw-panel.open { display: flex; flex-direction: column; }
 
 .bw-panel-header {
-  font-size: 7px; letter-spacing: 2px; color: var(--fg3);
-  padding: 10px 12px; border-bottom: var(--px) solid var(--fg3); flex-shrink: 0;
+  font-size: 7px; letter-spacing: 2px; color: var(--fg);
+  padding: 10px 12px; border-bottom: var(--px) solid var(--fg2); flex-shrink: 0;
 }
 
 /* TODO */
@@ -405,17 +405,17 @@ body {
 }
 .todo-item {
   display: flex; align-items: center; gap: 8px;
-  padding: 8px 12px; border-bottom: 1px solid var(--bg2); flex-shrink: 0;
+  padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.07); flex-shrink: 0;
 }
-.todo-item.done .todo-text { color: var(--fg3); text-decoration: line-through; }
+.todo-item.done .todo-text { color: var(--fg2); text-decoration: line-through; }
 .todo-check {
   width: 14px; height: 14px; flex-shrink: 0;
-  border: var(--px) solid var(--fg3); background: transparent; color: var(--fg);
+  border: var(--px) solid var(--fg2); background: transparent; color: var(--fg);
   font-size: 7px; font-family: 'Press Start 2P', monospace;
   cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
   transition: border-color .1s, background .1s;
 }
-.todo-item.done .todo-check { background: var(--fg3); color: var(--bg); border-color: var(--fg3); }
+.todo-item.done .todo-check { background: var(--fg2); color: var(--bg); border-color: var(--fg2); }
 .todo-check:hover { border-color: var(--border); }
 .todo-text {
   flex: 1; font-size: 6px; color: var(--fg); letter-spacing: .5px;
@@ -434,7 +434,7 @@ body {
   display: flex; border-top: var(--px) solid var(--fg3); flex-shrink: 0;
 }
 .todo-add-row input {
-  flex: 1; background: var(--bg2); border: none; outline: none;
+  flex: 1; background: var(--bg); border: none; outline: none;
   color: var(--fg); font-family: 'Press Start 2P', monospace;
   font-size: 6px; padding: 9px 10px; caret-color: var(--fg); letter-spacing: .5px;
 }
@@ -455,22 +455,22 @@ body {
 .note-tab {
   position: relative;
   background: transparent; border-right: var(--px) solid var(--fg3);
-  color: var(--fg3); font-family: 'Press Start 2P', monospace;
+  color: var(--fg2); font-family: 'Press Start 2P', monospace;
   font-size: 6px; padding: 8px 10px; cursor: pointer; white-space: nowrap;
   letter-spacing: .5px; display: flex; align-items: center; gap: 5px;
   transition: color .1s, background .1s; flex-shrink: 0; user-select: none;
 }
-.note-tab:hover { color: var(--fg2); background: var(--bg2); }
-.note-tab.active { background: var(--bg2); color: var(--fg); }
+.note-tab:hover { color: var(--fg); background: rgba(255,255,255,0.05); }
+.note-tab.active { background: var(--fg); color: var(--bg); }
 .note-tab-del {
   width: 10px; height: 10px; flex-shrink: 0; opacity: 0;
-  border: none; background: transparent; color: var(--fg3);
+  border: none; background: transparent; color: currentColor;
   font-size: 12px; cursor: pointer; padding: 0; line-height: 1;
   display: flex; align-items: center; justify-content: center;
-  transition: opacity .1s, color .1s;
+  transition: opacity .1s;
 }
-.note-tab:hover .note-tab-del { opacity: 1; }
-.note-tab-del:hover { color: var(--fg); }
+.note-tab:hover .note-tab-del { opacity: 0.6; }
+.note-tab-del:hover { opacity: 1 !important; }
 .note-tab-add {
   background: transparent; border: none; color: var(--fg3);
   font-family: 'Press Start 2P', monospace; font-size: 12px; padding: 6px 10px;
@@ -483,7 +483,7 @@ body {
   outline: none; caret-color: var(--fg); letter-spacing: .5px; width: 80px; flex-shrink: 0;
 }
 .notes-textarea {
-  width: 100%; height: 300px; background: var(--bg2); border: none; outline: none;
+  width: 100%; height: 300px; background: var(--bg); border: none; outline: none;
   color: var(--fg); font-family: 'Press Start 2P', monospace; font-size: 7px;
   padding: 12px; resize: none; caret-color: var(--fg); letter-spacing: .5px; line-height: 2;
   scrollbar-width: thin;
