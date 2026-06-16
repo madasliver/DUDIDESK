@@ -1063,19 +1063,14 @@ function initSettings() {
 
 // src/modules/clock.ts
 function initClock() {
-  const el = document.getElementById("clockWidget");
-  if (!el) return;
-  const timeEl = document.createElement("span");
-  timeEl.className = "clock-time";
-  const dateEl = document.createElement("span");
-  dateEl.className = "clock-date";
-  el.appendChild(timeEl);
-  el.appendChild(dateEl);
+  const timeEl = document.getElementById("clockTime");
+  const dateEl = document.getElementById("clockDate");
+  if (!timeEl && !dateEl) return;
   const pad = (n) => String(n).padStart(2, "0");
   function tick() {
     const now = /* @__PURE__ */ new Date();
-    timeEl.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-    dateEl.textContent = `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${now.getFullYear()}`;
+    if (timeEl) timeEl.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    if (dateEl) dateEl.textContent = `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${now.getFullYear()}`;
   }
   tick();
   setInterval(tick, 1e3);
