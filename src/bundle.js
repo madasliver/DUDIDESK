@@ -1716,14 +1716,14 @@ var STICKY_KEY = "dudidesk_stickies";
 var MAX = 8;
 var SIZE = 160;
 var COLORS = [
-  { id: "yellow", bg: "#f9f4a0", text: "#4a4520" },
-  { id: "pink", bg: "#f4a0c1", text: "#4a2035" },
-  { id: "blue", bg: "#a0c8f4", text: "#203a4a" },
-  { id: "green", bg: "#a0f4b8", text: "#204a2d" },
-  { id: "lavender", bg: "#c8a0f4", text: "#35204a" },
-  { id: "peach", bg: "#f4c8a0", text: "#4a3520" },
-  { id: "mint", bg: "#a0f4e0", text: "#204a3f" },
-  { id: "coral", bg: "#f4a0a0", text: "#4a2020" }
+  { id: "yellow", bg: "#f5e643", text: "#4a4210" },
+  { id: "pink", bg: "#f06ca5", text: "#3d1028" },
+  { id: "blue", bg: "#6ab4f5", text: "#122e45" },
+  { id: "green", bg: "#5ee89a", text: "#133d24" },
+  { id: "lavender", bg: "#b07af5", text: "#2a1245" },
+  { id: "peach", bg: "#f5a84e", text: "#3d2a10" },
+  { id: "mint", bg: "#4ee8c8", text: "#103d33" },
+  { id: "coral", bg: "#f56e6e", text: "#3d1212" }
 ];
 var colorIdx = 0;
 function load() {

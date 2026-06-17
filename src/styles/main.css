@@ -579,11 +579,11 @@ body {
   position: fixed; width: 160px; height: 160px;
   display: flex; flex-direction: column;
   pointer-events: auto; z-index: 50;
-  box-shadow: 2px 3px 8px rgba(0,0,0,.35);
+  box-shadow: 3px 4px 10px rgba(0,0,0,.4), 1px 1px 3px rgba(0,0,0,.2);
   transition: box-shadow .15s;
 }
-.sticky-note:hover { box-shadow: 3px 5px 14px rgba(0,0,0,.5); }
-.sticky-dragging { box-shadow: 5px 8px 20px rgba(0,0,0,.55) !important; opacity: 0.9; }
+.sticky-note:hover { box-shadow: 4px 6px 16px rgba(0,0,0,.55), 1px 2px 4px rgba(0,0,0,.3); }
+.sticky-dragging { box-shadow: 8px 12px 28px rgba(0,0,0,.6), 2px 3px 6px rgba(0,0,0,.3) !important; }
 .sticky-header {
   height: 22px; cursor: grab; flex-shrink: 0;
   border-bottom: 1px solid rgba(0,0,0,.12);
@@ -599,19 +599,19 @@ body {
 .sticky-del:hover { opacity: 1 !important; }
 .sticky-text {
   flex: 1; width: 100%; background: transparent; border: none; outline: none;
-  font-family: 'Press Start 2P', monospace; font-size: 7px;
+  font-family: 'Press Start 2P', monospace; font-size: 9px;
   padding: 8px; resize: none; line-height: 1.8; letter-spacing: .3px;
   caret-color: currentColor;
 }
 .sticky-text::placeholder { color: rgba(0,0,0,.25); }
 
 @keyframes stickyFall {
-  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
-  15%  { transform: translateY(40px) rotate(4deg); opacity: 0.95; }
-  30%  { transform: translateY(110px) rotate(-3deg); opacity: 0.8; }
-  50%  { transform: translateY(250px) rotate(5deg); opacity: 0.6; }
-  70%  { transform: translateY(450px) rotate(-4deg); opacity: 0.35; }
-  100% { transform: translateY(110vh) rotate(6deg); opacity: 0; }
+  0%   { transform: translateY(0) rotate(0deg); }
+  15%  { transform: translateY(60px) rotate(5deg); }
+  30%  { transform: translateY(180px) rotate(-4deg); }
+  50%  { transform: translateY(380px) rotate(6deg); }
+  70%  { transform: translateY(650px) rotate(-3deg); }
+  100% { transform: translateY(120vh) rotate(5deg); }
 }
 .sticky-falling { animation: stickyFall 1.4s ease-in forwards; pointer-events: none; }
 
