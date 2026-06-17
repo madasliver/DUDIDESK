@@ -597,4 +597,32 @@ body {
     height: 20px;
     font-size: 9px;
   }
+
+  /* Bottom dock: full-width, stacked */
+  .bw-dock { left: 16px; right: 16px; gap: 6px; }
+  .bw-item { width: 100%; }
+  .bw-btn { width: 100%; text-align: center; font-size: 8px; padding: 10px; }
+
+  /* Panels: full width, shorter */
+  .bw-panel { min-width: 0 !important; width: 100% !important; max-width: none !important; }
+  .notes-panel { width: 100% !important; }
+  .notes-panel.bw-sz-s,
+  .notes-panel.bw-sz-l { width: 100% !important; }
+
+  .todo-list { max-height: 200px !important; }
+  .bw-sz-s .todo-list { max-height: 140px !important; }
+  .bw-sz-l .todo-list { max-height: 280px !important; }
+
+  .notes-textarea { height: 200px !important; }
+  .bw-sz-s .notes-textarea { height: 140px !important; }
+  .bw-sz-l .notes-textarea { height: 280px !important; }
+
+  .notes-tabs-bar { flex-wrap: wrap; }
+  .note-tab { font-size: 5px; padding: 6px 7px; }
+  .note-tab-del { opacity: 0.6; }
+  .bw-panel-header { font-size: 6px; padding: 8px 10px; }
+  .bw-resize-btn { width: 16px; height: 16px; font-size: 8px; }
+  .todo-text { font-size: 8px; }
+  .todo-add-row input { font-size: 8px; }
+  .notes-textarea { font-size: 8px !important; }
 }
