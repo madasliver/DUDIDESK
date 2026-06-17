@@ -2,12 +2,12 @@ import type { Item, Tab } from "../types";
 import { prefs, savePrefs, loadShortcuts, saveShortcuts, tabOf, DEFAULT_TAB_ID } from "./state";
 import { render } from "./render";
 import { FOLDER_COLORS } from "./themes";
+import { pushUndo, popUndo, hasUndo, onUndoChange } from "./undo";
 
 export function itemsInTab(list: Item[], tabId: string): Item[] {
   return list.filter(i => tabOf(i) === tabId);
 }
 
-/** Applies (or clears) the tag-color styling for a tab button + its color dot. */
 function applyTabStyle(tab: Tab, btn: HTMLElement, dot: HTMLElement, active: boolean): void {
   const fc = FOLDER_COLORS.find(c => c.id === (tab.color || "none"))!;
   if (fc.id === "none") {
@@ -33,7 +33,6 @@ function applyTabStyle(tab: Tab, btn: HTMLElement, dot: HTMLElement, active: boo
   }
 }
 
-/** Active tab id, falling back to the first tab if it no longer exists. */
 export function getActiveTab(): string {
   if (!prefs.tabs.some(t => t.id === prefs.activeTab)) {
     prefs.activeTab = prefs.tabs[0]?.id || DEFAULT_TAB_ID;
@@ -134,19 +133,43 @@ function toggleColorPicker(tab: Tab, btn: HTMLElement): void {
 
 function deleteTab(id: string): void {
   if (prefs.tabs.length <= 1) return;
+  if (!confirm("Do you really want to delete this tab?")) return;
+
   const idx = prefs.tabs.findIndex(t => t.id === id);
   if (idx < 0) return;
-  prefs.tabs.splice(idx, 1);
-  const fallback = prefs.tabs[0].id;
+  const tab = { ...prefs.tabs[idx] };
 
   const list = loadShortcuts();
-  list.forEach(item => {
-    if (tabOf(item) === id) item.tabId = fallback;
-  });
-  saveShortcuts(list);
+  const tabItems = list.filter(item => tabOf(item) === id);
+  const remaining = list.filter(item => tabOf(item) !== id);
 
-  if (prefs.activeTab === id) prefs.activeTab = fallback;
+  pushUndo({ type: "tab", tab, items: tabItems });
+  saveShortcuts(remaining);
+
+  prefs.tabs.splice(idx, 1);
+  if (prefs.activeTab === id) prefs.activeTab = prefs.tabs[0].id;
   savePrefs();
+  renderTabs();
+  render();
+}
+
+function executeUndo(): void {
+  const action = popUndo();
+  if (!action) return;
+
+  if (action.type === "tab" && action.tab) {
+    prefs.tabs.push(action.tab);
+    prefs.activeTab = action.tab.id;
+    savePrefs();
+    const list = loadShortcuts();
+    action.items.forEach(item => list.push(item));
+    saveShortcuts(list);
+  } else {
+    const list = loadShortcuts();
+    action.items.forEach(item => list.push(item));
+    saveShortcuts(list);
+  }
+
   renderTabs();
   render();
 }
@@ -157,7 +180,13 @@ export function renderTabs(): void {
   colorPickerEl = null;
   const active = getActiveTab();
 
-  prefs.tabs.forEach(tab => {
+  let dragIdx = -1;
+  bar.onpointerup = () => {
+    dragIdx = -1;
+    bar.querySelectorAll(".dragging").forEach(t => t.classList.remove("dragging"));
+  };
+
+  prefs.tabs.forEach((tab, tabIdx) => {
     const btn = document.createElement("div");
     btn.className = "tab-btn" + (tab.id === active ? " active" : "");
     btn.dataset.tab = tab.id;
@@ -195,6 +224,23 @@ export function renderTabs(): void {
       startRename(tab, label);
     });
 
+    btn.addEventListener("pointerdown", e => {
+      if ((e.target as HTMLElement).closest(".tab-del, .tab-color-dot, .tab-color-picker")) return;
+      dragIdx = tabIdx;
+      btn.classList.add("dragging");
+    });
+
+    btn.addEventListener("pointerup", () => {
+      if (dragIdx >= 0 && dragIdx !== tabIdx) {
+        const tmp = prefs.tabs[dragIdx];
+        prefs.tabs[dragIdx] = prefs.tabs[tabIdx];
+        prefs.tabs[tabIdx] = tmp;
+        savePrefs();
+        renderTabs();
+      }
+      dragIdx = -1;
+    });
+
     bar.appendChild(btn);
   });
 
@@ -204,9 +250,22 @@ export function renderTabs(): void {
   addBtn.title = "add tab";
   addBtn.addEventListener("click", addTab);
   bar.appendChild(addBtn);
+
+  if (hasUndo()) {
+    const undoBtn = document.createElement("button");
+    undoBtn.className = "tab-undo-btn";
+    undoBtn.textContent = "↩";
+    undoBtn.title = "UNDO";
+    undoBtn.addEventListener("click", e => {
+      e.stopPropagation();
+      executeUndo();
+    });
+    bar.appendChild(undoBtn);
+  }
 }
 
 export function initTabs(): void {
+  onUndoChange(() => renderTabs());
   renderTabs();
   document.addEventListener("click", e => {
     if (colorPickerEl && !colorPickerEl.contains(e.target as Node)) {

@@ -1,10 +1,11 @@
 import type { LinkItem, FolderItem } from "../types";
 import { loadShortcuts, saveShortcuts, favicon, tabOf } from "./state";
-import { cellToXY, freeCell, resizePanel } from "./grid";
+import { cellToXY, resizePanel } from "./grid";
 import { attachDrag } from "./drag";
 import { openFolder } from "./folder";
 import { FOLDER_COLORS } from "./themes";
-import { getActiveTab, itemsInTab } from "./tabs";
+import { getActiveTab } from "./tabs";
+import { pushUndo } from "./undo";
 
 export function render(): void {
   resizePanel();
@@ -30,6 +31,8 @@ export function render(): void {
 export function makeScItem(item: LinkItem, idx: number): HTMLAnchorElement {
   const el = document.createElement("a");
   el.href = item.url;
+  el.target = "_blank";
+  el.rel = "noopener noreferrer";
   el.className = "sc-item";
   el.dataset.idx = String(idx);
   el.innerHTML = `
@@ -43,7 +46,8 @@ export function makeScItem(item: LinkItem, idx: number): HTMLAnchorElement {
     e.preventDefault();
     e.stopPropagation();
     const l = loadShortcuts();
-    l.splice(idx, 1);
+    const deleted = l.splice(idx, 1);
+    pushUndo({ type: "icon", items: deleted });
     saveShortcuts(l);
     render();
   });
@@ -80,14 +84,8 @@ export function makeFolderEl(folder: FolderItem, idx: number): HTMLDivElement {
     e.preventDefault();
     e.stopPropagation();
     const l = loadShortcuts();
-    const folder = l[idx] as FolderItem;
-    const items = folder.items || [];
-    const tabId = tabOf(folder);
-    l.splice(idx, 1);
-    items.forEach(it => {
-      const pos = freeCell(itemsInTab(l, tabId));
-      l.push({ type: "link", name: it.name, url: it.url, col: pos.col, row: pos.row, tabId });
-    });
+    const deleted = l.splice(idx, 1);
+    pushUndo({ type: "icon", items: deleted });
     saveShortcuts(l);
     render();
   });
