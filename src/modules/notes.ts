@@ -24,10 +24,19 @@ function saveNotes(state: NotesState): void {
   localStorage.setItem(NOTES_KEY, JSON.stringify(state));
 }
 
+let undoStack: { tab: NoteTab; index: number } | null = null;
+
 function renderNotesTabs(state: NotesState, textarea: HTMLTextAreaElement): void {
   const bar = document.getElementById("notesTabsBar");
   if (!bar) return;
   bar.innerHTML = "";
+
+  let dragIdx = -1;
+
+  bar.onpointerup = () => {
+    dragIdx = -1;
+    bar.querySelectorAll(".dragging").forEach(t => t.classList.remove("dragging"));
+  };
 
   state.tabs.forEach((tab, idx) => {
     const el = document.createElement("div");
@@ -61,6 +70,26 @@ function renderNotesTabs(state: NotesState, textarea: HTMLTextAreaElement): void
       inp.addEventListener("keydown", k => { if (k.key === "Enter") inp.blur(); });
     });
 
+    el.addEventListener("pointerdown", e => {
+      if ((e.target as HTMLElement).closest(".note-tab-del")) return;
+      dragIdx = idx;
+      el.classList.add("dragging");
+    });
+
+    el.addEventListener("pointerup", () => {
+      if (dragIdx >= 0 && dragIdx !== idx) {
+        const tmp = state.tabs[dragIdx];
+        state.tabs[dragIdx] = state.tabs[idx];
+        state.tabs[idx] = tmp;
+        if (state.activeIdx === dragIdx) state.activeIdx = idx;
+        else if (state.activeIdx === idx) state.activeIdx = dragIdx;
+        saveNotes(state);
+        textarea.value = state.tabs[state.activeIdx].content;
+        renderNotesTabs(state, textarea);
+      }
+      dragIdx = -1;
+    });
+
     el.appendChild(label);
 
     if (state.tabs.length > 1) {
@@ -69,6 +98,7 @@ function renderNotesTabs(state: NotesState, textarea: HTMLTextAreaElement): void
       del.textContent = "×";
       del.addEventListener("click", e => {
         e.stopPropagation();
+        undoStack = { tab: { ...state.tabs[idx] }, index: idx };
         state.tabs.splice(idx, 1);
         state.activeIdx = Math.min(state.activeIdx, state.tabs.length - 1);
         saveNotes(state);
@@ -95,6 +125,24 @@ function renderNotesTabs(state: NotesState, textarea: HTMLTextAreaElement): void
       textarea.focus();
     });
     bar.appendChild(addBtn);
+  }
+
+  if (undoStack) {
+    const undoBtn = document.createElement("button");
+    undoBtn.className = "note-tab-undo";
+    undoBtn.textContent = "↩";
+    undoBtn.title = "UNDO";
+    undoBtn.addEventListener("click", () => {
+      if (!undoStack) return;
+      const insertAt = Math.min(undoStack.index, state.tabs.length);
+      state.tabs.splice(insertAt, 0, undoStack.tab);
+      state.activeIdx = insertAt;
+      saveNotes(state);
+      textarea.value = undoStack.tab.content;
+      undoStack = null;
+      renderNotesTabs(state, textarea);
+    });
+    bar.appendChild(undoBtn);
   }
 }
 
