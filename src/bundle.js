@@ -1212,10 +1212,21 @@ function positionWidget() {
     widget.style.top = prefs.clockY + "px";
   }
 }
+var PROTECTED = [".icon-panel", ".tab-bar", ".search-panel", ".wordmark", ".icon-panel-wrap"];
+function overlapsProtected(x, y, w, h) {
+  for (const sel of PROTECTED) {
+    const el = document.querySelector(sel);
+    if (!el) continue;
+    const r = el.getBoundingClientRect();
+    if (x + w > r.left && x < r.right && y + h > r.top && y < r.bottom) return true;
+  }
+  return false;
+}
 function attachDrag2() {
   if (!widget) return;
   let dragging2 = false;
   let ox = 0, oy = 0;
+  let prevX = 0, prevY = 0;
   widget.addEventListener("dblclick", () => {
     prefs.clockX = -1;
     prefs.clockY = 12;
@@ -1227,6 +1238,8 @@ function attachDrag2() {
     const rect = widget.getBoundingClientRect();
     ox = e.clientX - rect.left;
     oy = e.clientY - rect.top;
+    prevX = rect.left;
+    prevY = rect.top;
     widget.classList.add("clock-dragging");
     widget.setPointerCapture(e.pointerId);
   });
@@ -1243,6 +1256,13 @@ function attachDrag2() {
     if (!dragging2) return;
     dragging2 = false;
     widget.classList.remove("clock-dragging");
+    const rect = widget.getBoundingClientRect();
+    if (overlapsProtected(rect.left, rect.top, rect.width, rect.height)) {
+      widget.style.left = prevX + "px";
+      widget.style.top = prevY + "px";
+      prefs.clockX = prevX;
+      prefs.clockY = prevY;
+    }
     savePrefs();
   });
 }
@@ -1925,11 +1945,15 @@ function load() {
 function save(list) {
   localStorage.setItem(STICKY_KEY, JSON.stringify(list));
 }
-function overlapsPanel(x, y) {
-  const panel = document.querySelector(".icon-panel");
-  if (!panel) return false;
-  const r = panel.getBoundingClientRect();
-  return x + SIZE > r.left && x < r.right && y + SIZE > r.top && y < r.bottom;
+var PROTECTED2 = [".icon-panel", ".tab-bar", ".search-panel", ".wordmark", ".icon-panel-wrap"];
+function overlapsProtected2(x, y, w, h) {
+  for (const sel of PROTECTED2) {
+    const el = document.querySelector(sel);
+    if (!el) continue;
+    const r = el.getBoundingClientRect();
+    if (x + w > r.left && x < r.right && y + h > r.top && y < r.bottom) return true;
+  }
+  return false;
 }
 function clamp(x, y) {
   return {
@@ -1998,7 +2022,7 @@ function makeSticky(note, layer) {
     if (!dragging2) return;
     dragging2 = false;
     el.classList.remove("sticky-dragging");
-    if (overlapsPanel(note.x, note.y)) {
+    if (overlapsProtected2(note.x, note.y, SIZE, SIZE)) {
       note.x = prevX;
       note.y = prevY;
       el.style.left = prevX + "px";
@@ -2027,7 +2051,7 @@ function addSticky() {
     100 + Math.random() * (window.innerWidth - SIZE - 200),
     100 + Math.random() * (window.innerHeight - SIZE - 200)
   );
-  if (overlapsPanel(pos.x, pos.y)) {
+  if (overlapsProtected2(pos.x, pos.y, SIZE, SIZE)) {
     pos.x = 60;
     pos.y = 60;
   }

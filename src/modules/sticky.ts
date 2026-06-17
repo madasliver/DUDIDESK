@@ -32,11 +32,16 @@ function save(list: StickyNote[]): void {
   localStorage.setItem(STICKY_KEY, JSON.stringify(list));
 }
 
-function overlapsPanel(x: number, y: number): boolean {
-  const panel = document.querySelector(".icon-panel");
-  if (!panel) return false;
-  const r = panel.getBoundingClientRect();
-  return x + SIZE > r.left && x < r.right && y + SIZE > r.top && y < r.bottom;
+const PROTECTED = [".icon-panel", ".tab-bar", ".search-panel", ".wordmark", ".icon-panel-wrap"];
+
+function overlapsProtected(x: number, y: number, w: number, h: number): boolean {
+  for (const sel of PROTECTED) {
+    const el = document.querySelector(sel);
+    if (!el) continue;
+    const r = el.getBoundingClientRect();
+    if (x + w > r.left && x < r.right && y + h > r.top && y < r.bottom) return true;
+  }
+  return false;
 }
 
 function clamp(x: number, y: number): { x: number; y: number } {
@@ -113,7 +118,7 @@ function makeSticky(note: StickyNote, layer: HTMLElement): HTMLElement {
     if (!dragging) return;
     dragging = false;
     el.classList.remove("sticky-dragging");
-    if (overlapsPanel(note.x, note.y)) {
+    if (overlapsProtected(note.x, note.y, SIZE, SIZE)) {
       note.x = prevX;
       note.y = prevY;
       el.style.left = prevX + "px";
@@ -144,7 +149,7 @@ function addSticky(): void {
   );
 
   // avoid icon panel
-  if (overlapsPanel(pos.x, pos.y)) {
+  if (overlapsProtected(pos.x, pos.y, SIZE, SIZE)) {
     pos.x = 60;
     pos.y = 60;
   }

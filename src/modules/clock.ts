@@ -143,10 +143,23 @@ function positionWidget(): void {
   }
 }
 
+const PROTECTED = [".icon-panel", ".tab-bar", ".search-panel", ".wordmark", ".icon-panel-wrap"];
+
+function overlapsProtected(x: number, y: number, w: number, h: number): boolean {
+  for (const sel of PROTECTED) {
+    const el = document.querySelector(sel);
+    if (!el) continue;
+    const r = el.getBoundingClientRect();
+    if (x + w > r.left && x < r.right && y + h > r.top && y < r.bottom) return true;
+  }
+  return false;
+}
+
 function attachDrag(): void {
   if (!widget) return;
   let dragging = false;
   let ox = 0, oy = 0;
+  let prevX = 0, prevY = 0;
 
   widget.addEventListener("dblclick", () => {
     prefs.clockX = -1;
@@ -160,6 +173,8 @@ function attachDrag(): void {
     const rect = widget!.getBoundingClientRect();
     ox = e.clientX - rect.left;
     oy = e.clientY - rect.top;
+    prevX = rect.left;
+    prevY = rect.top;
     widget!.classList.add("clock-dragging");
     widget!.setPointerCapture(e.pointerId);
   });
@@ -178,6 +193,13 @@ function attachDrag(): void {
     if (!dragging) return;
     dragging = false;
     widget!.classList.remove("clock-dragging");
+    const rect = widget!.getBoundingClientRect();
+    if (overlapsProtected(rect.left, rect.top, rect.width, rect.height)) {
+      widget!.style.left = prevX + "px";
+      widget!.style.top = prevY + "px";
+      prefs.clockX = prevX;
+      prefs.clockY = prevY;
+    }
     savePrefs();
   });
 }
