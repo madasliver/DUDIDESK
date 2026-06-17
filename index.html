@@ -156,6 +156,11 @@
           <span class="timer-sep">:</span>
           <input type="number" id="timerSec" min="0" max="59" value="0" />
         </div>
+        <div class="slider-row timer-vol-row">
+          <span style="width:auto;font-size:6px;letter-spacing:1px;color:var(--fg3)">VOL</span>
+          <input type="range" id="timerVol" min="0" max="100" value="50" />
+          <span id="timerVolVal"></span>
+        </div>
         <div class="timer-actions">
           <button id="timerStartBtn" class="btn-add">START</button>
           <button id="timerStopBtn" class="btn-cancel">RESET</button>

@@ -566,6 +566,7 @@ body {
 .timer-input-row input:focus { border-color: var(--border); }
 .timer-input-row input:disabled { opacity: 0.4; }
 .timer-sep { font-size: 18px; color: var(--fg2); }
+.timer-vol-row { padding: 0 16px 12px; }
 .timer-actions {
   display: flex; gap: 8px; padding: 12px; border-top: var(--px) solid var(--fg3);
   justify-content: center;

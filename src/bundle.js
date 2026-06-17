@@ -1542,6 +1542,8 @@ var remaining = 0;
 var interval = 0;
 var alarmCtx = null;
 var alarmLoop = 0;
+var masterGain = null;
+var volume = 0.5;
 function pad(n) {
   return n.toString().padStart(2, "0");
 }
@@ -1554,35 +1556,27 @@ function updateDisplay(sec) {
   }
 }
 function playMelody(ctx) {
+  if (!masterGain) return;
   const notes = [
     523,
     659,
     784,
     1047,
-    // C5 E5 G5 C6 — ascending
     0,
-    // pause
     523,
     659,
     784,
     1047,
-    // repeat
     0,
-    // pause
     880,
     784,
     659,
     523,
-    // A5 G5 E5 C5 — descending
     0
-    // pause
   ];
   const dur = 0.1;
   const gap = 0.05;
   const step = dur + gap;
-  const gain = ctx.createGain();
-  gain.gain.value = 0.12;
-  gain.connect(ctx.destination);
   notes.forEach((freq, i) => {
     if (freq === 0) return;
     const osc = ctx.createOscillator();
@@ -1592,13 +1586,16 @@ function playMelody(ctx) {
     noteGain.gain.setValueAtTime(1, ctx.currentTime + i * step);
     noteGain.gain.setValueAtTime(0, ctx.currentTime + i * step + dur);
     osc.connect(noteGain);
-    noteGain.connect(gain);
+    noteGain.connect(masterGain);
     osc.start(ctx.currentTime + i * step);
     osc.stop(ctx.currentTime + i * step + dur + 0.01);
   });
 }
 function startAlarm() {
   alarmCtx = new AudioContext();
+  masterGain = alarmCtx.createGain();
+  masterGain.gain.value = volume;
+  masterGain.connect(alarmCtx.destination);
   playMelody(alarmCtx);
   alarmLoop = window.setInterval(() => {
     if (alarmCtx) playMelody(alarmCtx);
@@ -1607,6 +1604,7 @@ function startAlarm() {
 function stopAlarm() {
   clearInterval(alarmLoop);
   alarmLoop = 0;
+  masterGain = null;
   if (alarmCtx) {
     void alarmCtx.close();
     alarmCtx = null;
@@ -1651,6 +1649,14 @@ function initTimer() {
   const secInput = document.getElementById("timerSec");
   if (!btn || !panel || !startBtn || !stopBtn || !minInput || !secInput) return;
   panel.addEventListener("click", (e) => e.stopPropagation());
+  const volSlider = document.getElementById("timerVol");
+  const volVal = document.getElementById("timerVolVal");
+  volSlider?.addEventListener("input", () => {
+    const v = parseInt(volSlider.value) || 0;
+    volume = v / 100;
+    if (volVal) volVal.textContent = String(v);
+    if (masterGain) masterGain.gain.value = volume;
+  });
   btn.addEventListener("click", (e) => {
     e.stopPropagation();
     const opening = !panel.classList.contains("open");
