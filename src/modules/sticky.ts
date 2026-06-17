@@ -7,8 +7,8 @@ interface StickyNote {
 }
 
 const STICKY_KEY = "dudidesk_stickies";
-const MAX = 8;
-const SIZE = 160;
+const MAX = 12;
+const SIZE = 210;
 
 const COLORS = [
   { id: "yellow",   bg: "#f5e643", text: "#4a4210" },
@@ -74,7 +74,7 @@ function makeSticky(note: StickyNote, layer: HTMLElement): HTMLElement {
   const textarea = document.createElement("textarea");
   textarea.className = "sticky-text";
   textarea.value = note.text;
-  textarea.placeholder = "...";
+  textarea.placeholder = "drag me by the top bar and drop me anywhere on your desk!";
   textarea.style.color = c.text;
   textarea.addEventListener("input", () => {
     const list = load();
@@ -153,7 +153,7 @@ function addSticky(): void {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
     x: pos.x,
     y: pos.y,
-    text: "drag me by the top bar and drop me anywhere on your desk!",
+    text: "",
     color: c.id,
   };
 
