@@ -203,7 +203,8 @@ body {
   font-size: 12px; padding: 4px 10px; cursor: pointer;
   font-family: 'Press Start 2P', monospace; transition: border-color .1s, color .1s;
 }
-.tab-undo-btn:hover { border-color: var(--border); color: var(--fg); border-style: solid; }
+.tab-undo-btn:hover:not(:disabled) { border-color: var(--border); color: var(--fg); border-style: solid; }
+.tab-undo-btn:disabled { opacity: 0.3; cursor: default; }
 .tab-btn.dragging { opacity: 0.35; }
 
 /* ── ICON PANEL ──────────────────────────────────────────── */
@@ -377,6 +378,27 @@ body {
 .btn-cancel:hover { border-color: var(--fg2); color: var(--fg2); }
 .btn-add { background: var(--fg); border-color: var(--fg); color: var(--bg); }
 .btn-add:hover { background: var(--fg2); border-color: var(--fg2); }
+
+/* ── CONFIRM MODAL ───────────────────────────────────────── */
+.confirm-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(10, 10, 10, .88);
+  align-items: center; justify-content: center; z-index: 400;
+}
+.confirm-overlay.open { display: flex; }
+.confirm-box {
+  background: var(--bg); border: var(--px) solid var(--border);
+  padding: 24px 28px; width: 340px; max-width: 92vw;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.confirm-msg {
+  font-size: 9px; color: var(--fg); letter-spacing: 1px; line-height: 2;
+  text-transform: uppercase;
+}
+.confirm-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.confirm-actions button {
+  padding: 9px 14px; border: var(--px) solid; font-size: 8px;
+  font-family: 'Press Start 2P', monospace; cursor: pointer; letter-spacing: 1px; text-transform: uppercase;
+}
 
 /* ── BOTTOM DOCK (TODO + NOTES) ─────────────────────────── */
 .bw-dock {

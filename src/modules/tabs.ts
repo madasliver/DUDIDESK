@@ -131,9 +131,38 @@ function toggleColorPicker(tab: Tab, btn: HTMLElement): void {
   colorPickerEl = picker;
 }
 
-function deleteTab(id: string): void {
+function showConfirm(msg: string): Promise<boolean> {
+  return new Promise(resolve => {
+    let overlay = document.querySelector<HTMLElement>(".confirm-overlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.className = "confirm-overlay";
+      document.body.appendChild(overlay);
+    }
+    overlay.innerHTML = `
+      <div class="confirm-box">
+        <div class="confirm-msg">${msg}</div>
+        <div class="confirm-actions">
+          <button class="btn-cancel">CANCEL</button>
+          <button class="btn-add">DELETE</button>
+        </div>
+      </div>`;
+    overlay.classList.add("open");
+
+    const close = (result: boolean) => {
+      overlay!.classList.remove("open");
+      resolve(result);
+    };
+    overlay.querySelector(".btn-cancel")!.addEventListener("click", () => close(false));
+    overlay.querySelector(".btn-add")!.addEventListener("click", () => close(true));
+    overlay.addEventListener("click", e => { if (e.target === overlay) close(false); });
+  });
+}
+
+async function deleteTab(id: string): Promise<void> {
   if (prefs.tabs.length <= 1) return;
-  if (!confirm("Do you really want to delete this tab?")) return;
+  const ok = await showConfirm("Do you really want to delete this tab?");
+  if (!ok) return;
 
   const idx = prefs.tabs.findIndex(t => t.id === id);
   if (idx < 0) return;
@@ -251,17 +280,16 @@ export function renderTabs(): void {
   addBtn.addEventListener("click", addTab);
   bar.appendChild(addBtn);
 
-  if (hasUndo()) {
-    const undoBtn = document.createElement("button");
-    undoBtn.className = "tab-undo-btn";
-    undoBtn.textContent = "↩";
-    undoBtn.title = "UNDO";
-    undoBtn.addEventListener("click", e => {
-      e.stopPropagation();
-      executeUndo();
-    });
-    bar.appendChild(undoBtn);
-  }
+  const undoBtn = document.createElement("button");
+  undoBtn.className = "tab-undo-btn";
+  undoBtn.textContent = "↩";
+  undoBtn.title = "UNDO";
+  if (!hasUndo()) undoBtn.disabled = true;
+  undoBtn.addEventListener("click", e => {
+    e.stopPropagation();
+    executeUndo();
+  });
+  bar.appendChild(undoBtn);
 }
 
 export function initTabs(): void {

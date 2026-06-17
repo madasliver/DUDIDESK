@@ -510,6 +510,27 @@ function attachDrag(el, item, idx) {
   });
 }
 
+// src/modules/undo.ts
+var MAX_UNDO = 5;
+var stack = [];
+var onChange = null;
+function pushUndo(action) {
+  stack.push(action);
+  if (stack.length > MAX_UNDO) stack.shift();
+  onChange?.();
+}
+function popUndo() {
+  const action = stack.pop();
+  onChange?.();
+  return action;
+}
+function hasUndo() {
+  return stack.length > 0;
+}
+function onUndoChange(cb) {
+  onChange = cb;
+}
+
 // src/modules/render.ts
 function render() {
   resizePanel();
@@ -543,7 +564,8 @@ function makeScItem(item, idx) {
     e.preventDefault();
     e.stopPropagation();
     const l = loadShortcuts();
-    l.splice(idx, 1);
+    const deleted = l.splice(idx, 1);
+    pushUndo({ type: "icon", items: deleted });
     saveShortcuts(l);
     render();
   });
@@ -570,14 +592,8 @@ function makeFolderEl(folder, idx) {
     e.preventDefault();
     e.stopPropagation();
     const l = loadShortcuts();
-    const folder2 = l[idx];
-    const items = folder2.items || [];
-    const tabId = tabOf(folder2);
-    l.splice(idx, 1);
-    items.forEach((it) => {
-      const pos = freeCell(itemsInTab(l, tabId));
-      l.push({ type: "link", name: it.name, url: it.url, col: pos.col, row: pos.row, tabId });
-    });
+    const deleted = l.splice(idx, 1);
+    pushUndo({ type: "icon", items: deleted });
     saveShortcuts(l);
     render();
   });
@@ -703,19 +719,67 @@ function toggleColorPicker(tab, btn) {
   btn.appendChild(picker);
   colorPickerEl = picker;
 }
-function deleteTab(id) {
+function showConfirm(msg) {
+  return new Promise((resolve) => {
+    let overlay = document.querySelector(".confirm-overlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.className = "confirm-overlay";
+      document.body.appendChild(overlay);
+    }
+    overlay.innerHTML = `
+      <div class="confirm-box">
+        <div class="confirm-msg">${msg}</div>
+        <div class="confirm-actions">
+          <button class="btn-cancel">CANCEL</button>
+          <button class="btn-add">DELETE</button>
+        </div>
+      </div>`;
+    overlay.classList.add("open");
+    const close = (result) => {
+      overlay.classList.remove("open");
+      resolve(result);
+    };
+    overlay.querySelector(".btn-cancel").addEventListener("click", () => close(false));
+    overlay.querySelector(".btn-add").addEventListener("click", () => close(true));
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) close(false);
+    });
+  });
+}
+async function deleteTab(id) {
   if (prefs.tabs.length <= 1) return;
+  const ok = await showConfirm("Do you really want to delete this tab?");
+  if (!ok) return;
   const idx = prefs.tabs.findIndex((t) => t.id === id);
   if (idx < 0) return;
-  prefs.tabs.splice(idx, 1);
-  const fallback = prefs.tabs[0].id;
+  const tab = { ...prefs.tabs[idx] };
   const list = loadShortcuts();
-  list.forEach((item) => {
-    if (tabOf(item) === id) item.tabId = fallback;
-  });
-  saveShortcuts(list);
-  if (prefs.activeTab === id) prefs.activeTab = fallback;
+  const tabItems = list.filter((item) => tabOf(item) === id);
+  const remaining = list.filter((item) => tabOf(item) !== id);
+  pushUndo({ type: "tab", tab, items: tabItems });
+  saveShortcuts(remaining);
+  prefs.tabs.splice(idx, 1);
+  if (prefs.activeTab === id) prefs.activeTab = prefs.tabs[0].id;
   savePrefs();
+  renderTabs();
+  render();
+}
+function executeUndo() {
+  const action = popUndo();
+  if (!action) return;
+  if (action.type === "tab" && action.tab) {
+    prefs.tabs.push(action.tab);
+    prefs.activeTab = action.tab.id;
+    savePrefs();
+    const list = loadShortcuts();
+    action.items.forEach((item) => list.push(item));
+    saveShortcuts(list);
+  } else {
+    const list = loadShortcuts();
+    action.items.forEach((item) => list.push(item));
+    saveShortcuts(list);
+  }
   renderTabs();
   render();
 }
@@ -724,7 +788,12 @@ function renderTabs() {
   bar.innerHTML = "";
   colorPickerEl = null;
   const active = getActiveTab();
-  prefs.tabs.forEach((tab) => {
+  let dragIdx = -1;
+  bar.onpointerup = () => {
+    dragIdx = -1;
+    bar.querySelectorAll(".dragging").forEach((t) => t.classList.remove("dragging"));
+  };
+  prefs.tabs.forEach((tab, tabIdx) => {
     const btn = document.createElement("div");
     btn.className = "tab-btn" + (tab.id === active ? " active" : "");
     btn.dataset.tab = tab.id;
@@ -757,6 +826,21 @@ function renderTabs() {
       e.stopPropagation();
       startRename(tab, label);
     });
+    btn.addEventListener("pointerdown", (e) => {
+      if (e.target.closest(".tab-del, .tab-color-dot, .tab-color-picker")) return;
+      dragIdx = tabIdx;
+      btn.classList.add("dragging");
+    });
+    btn.addEventListener("pointerup", () => {
+      if (dragIdx >= 0 && dragIdx !== tabIdx) {
+        const tmp = prefs.tabs[dragIdx];
+        prefs.tabs[dragIdx] = prefs.tabs[tabIdx];
+        prefs.tabs[tabIdx] = tmp;
+        savePrefs();
+        renderTabs();
+      }
+      dragIdx = -1;
+    });
     bar.appendChild(btn);
   });
   const addBtn = document.createElement("button");
@@ -765,8 +849,19 @@ function renderTabs() {
   addBtn.title = "add tab";
   addBtn.addEventListener("click", addTab);
   bar.appendChild(addBtn);
+  const undoBtn = document.createElement("button");
+  undoBtn.className = "tab-undo-btn";
+  undoBtn.textContent = "\u21A9";
+  undoBtn.title = "UNDO";
+  if (!hasUndo()) undoBtn.disabled = true;
+  undoBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    executeUndo();
+  });
+  bar.appendChild(undoBtn);
 }
 function initTabs() {
+  onUndoChange(() => renderTabs());
   renderTabs();
   document.addEventListener("click", (e) => {
     if (colorPickerEl && !colorPickerEl.contains(e.target)) {
@@ -1265,10 +1360,16 @@ function loadNotes() {
 function saveNotes(state) {
   localStorage.setItem(NOTES_KEY, JSON.stringify(state));
 }
+var undoStack = null;
 function renderNotesTabs(state, textarea) {
   const bar = document.getElementById("notesTabsBar");
   if (!bar) return;
   bar.innerHTML = "";
+  let dragIdx = -1;
+  bar.onpointerup = () => {
+    dragIdx = -1;
+    bar.querySelectorAll(".dragging").forEach((t) => t.classList.remove("dragging"));
+  };
   state.tabs.forEach((tab, idx) => {
     const el = document.createElement("div");
     el.className = "note-tab" + (idx === state.activeIdx ? " active" : "");
@@ -1299,6 +1400,24 @@ function renderNotesTabs(state, textarea) {
         if (k.key === "Enter") inp.blur();
       });
     });
+    el.addEventListener("pointerdown", (e) => {
+      if (e.target.closest(".note-tab-del")) return;
+      dragIdx = idx;
+      el.classList.add("dragging");
+    });
+    el.addEventListener("pointerup", () => {
+      if (dragIdx >= 0 && dragIdx !== idx) {
+        const tmp = state.tabs[dragIdx];
+        state.tabs[dragIdx] = state.tabs[idx];
+        state.tabs[idx] = tmp;
+        if (state.activeIdx === dragIdx) state.activeIdx = idx;
+        else if (state.activeIdx === idx) state.activeIdx = dragIdx;
+        saveNotes(state);
+        textarea.value = state.tabs[state.activeIdx].content;
+        renderNotesTabs(state, textarea);
+      }
+      dragIdx = -1;
+    });
     el.appendChild(label);
     if (state.tabs.length > 1) {
       const del = document.createElement("button");
@@ -1306,6 +1425,7 @@ function renderNotesTabs(state, textarea) {
       del.textContent = "\xD7";
       del.addEventListener("click", (e) => {
         e.stopPropagation();
+        undoStack = { tab: { ...state.tabs[idx] }, index: idx };
         state.tabs.splice(idx, 1);
         state.activeIdx = Math.min(state.activeIdx, state.tabs.length - 1);
         saveNotes(state);
@@ -1330,6 +1450,23 @@ function renderNotesTabs(state, textarea) {
       textarea.focus();
     });
     bar.appendChild(addBtn);
+  }
+  if (undoStack) {
+    const undoBtn = document.createElement("button");
+    undoBtn.className = "note-tab-undo";
+    undoBtn.textContent = "\u21A9";
+    undoBtn.title = "UNDO";
+    undoBtn.addEventListener("click", () => {
+      if (!undoStack) return;
+      const insertAt = Math.min(undoStack.index, state.tabs.length);
+      state.tabs.splice(insertAt, 0, undoStack.tab);
+      state.activeIdx = insertAt;
+      saveNotes(state);
+      textarea.value = undoStack.tab.content;
+      undoStack = null;
+      renderNotesTabs(state, textarea);
+    });
+    bar.appendChild(undoBtn);
   }
 }
 function initNotes() {
