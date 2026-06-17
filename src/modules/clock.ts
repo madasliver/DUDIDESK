@@ -131,13 +131,15 @@ function renderContent(style: ClockStyle): void {
 function positionWidget(): void {
   if (!widget) return;
   if (prefs.clockX < 0) {
-    widget.style.left = "50%";
-    widget.style.top = prefs.clockY + "px";
-    widget.style.transform = "translateX(-50%)";
+    requestAnimationFrame(() => {
+      if (!widget) return;
+      const w = widget.offsetWidth;
+      widget.style.left = Math.round((window.innerWidth - w) / 2) + "px";
+      widget.style.top = prefs.clockY + "px";
+    });
   } else {
     widget.style.left = prefs.clockX + "px";
     widget.style.top = prefs.clockY + "px";
-    widget.style.transform = "";
   }
 }
 
@@ -158,7 +160,6 @@ function attachDrag(): void {
     const rect = widget!.getBoundingClientRect();
     ox = e.clientX - rect.left;
     oy = e.clientY - rect.top;
-    widget!.style.transform = "";
     widget!.classList.add("clock-dragging");
     widget!.setPointerCapture(e.pointerId);
   });
