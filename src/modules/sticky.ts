@@ -153,7 +153,7 @@ function addSticky(): void {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
     x: pos.x,
     y: pos.y,
-    text: "",
+    text: "drag me by the top bar and drop me anywhere on your desk!",
     color: c.id,
   };
 
