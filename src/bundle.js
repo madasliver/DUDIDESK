@@ -1711,6 +1711,159 @@ function initTimer() {
   });
 }
 
+// src/modules/sticky.ts
+var STICKY_KEY = "dudidesk_stickies";
+var MAX = 8;
+var SIZE = 160;
+var COLORS = [
+  { id: "yellow", bg: "#f9f4a0", text: "#4a4520" },
+  { id: "pink", bg: "#f4a0c1", text: "#4a2035" },
+  { id: "blue", bg: "#a0c8f4", text: "#203a4a" },
+  { id: "green", bg: "#a0f4b8", text: "#204a2d" },
+  { id: "lavender", bg: "#c8a0f4", text: "#35204a" },
+  { id: "peach", bg: "#f4c8a0", text: "#4a3520" },
+  { id: "mint", bg: "#a0f4e0", text: "#204a3f" },
+  { id: "coral", bg: "#f4a0a0", text: "#4a2020" }
+];
+var colorIdx = 0;
+function load() {
+  try {
+    return JSON.parse(localStorage.getItem(STICKY_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+function save(list) {
+  localStorage.setItem(STICKY_KEY, JSON.stringify(list));
+}
+function overlapsPanel(x, y) {
+  const panel = document.querySelector(".icon-panel");
+  if (!panel) return false;
+  const r = panel.getBoundingClientRect();
+  return x + SIZE > r.left && x < r.right && y + SIZE > r.top && y < r.bottom;
+}
+function clamp(x, y) {
+  return {
+    x: Math.max(0, Math.min(window.innerWidth - SIZE, x)),
+    y: Math.max(0, Math.min(window.innerHeight - SIZE, y))
+  };
+}
+function makeSticky(note, layer) {
+  const el = document.createElement("div");
+  el.className = "sticky-note";
+  el.dataset.id = note.id;
+  const c = COLORS.find((c2) => c2.id === note.color) || COLORS[0];
+  el.style.left = note.x + "px";
+  el.style.top = note.y + "px";
+  el.style.background = c.bg;
+  el.style.color = c.text;
+  const del = document.createElement("button");
+  del.className = "sticky-del";
+  del.textContent = "\xD7";
+  del.style.color = c.text;
+  del.addEventListener("click", (e) => {
+    e.stopPropagation();
+    el.classList.add("sticky-falling");
+    el.addEventListener("animationend", () => {
+      el.remove();
+      const list = load().filter((s) => s.id !== note.id);
+      save(list);
+    });
+  });
+  const textarea = document.createElement("textarea");
+  textarea.className = "sticky-text";
+  textarea.value = note.text;
+  textarea.placeholder = "...";
+  textarea.style.color = c.text;
+  textarea.addEventListener("input", () => {
+    const list = load();
+    const s = list.find((s2) => s2.id === note.id);
+    if (s) {
+      s.text = textarea.value;
+      save(list);
+    }
+  });
+  const header = document.createElement("div");
+  header.className = "sticky-header";
+  let dragging2 = false;
+  let ox = 0, oy = 0;
+  let prevX = note.x, prevY = note.y;
+  header.addEventListener("pointerdown", (e) => {
+    dragging2 = true;
+    ox = e.clientX - note.x;
+    oy = e.clientY - note.y;
+    prevX = note.x;
+    prevY = note.y;
+    el.classList.add("sticky-dragging");
+    header.setPointerCapture(e.pointerId);
+  });
+  header.addEventListener("pointermove", (e) => {
+    if (!dragging2) return;
+    const pos = clamp(e.clientX - ox, e.clientY - oy);
+    note.x = pos.x;
+    note.y = pos.y;
+    el.style.left = pos.x + "px";
+    el.style.top = pos.y + "px";
+  });
+  header.addEventListener("pointerup", () => {
+    if (!dragging2) return;
+    dragging2 = false;
+    el.classList.remove("sticky-dragging");
+    if (overlapsPanel(note.x, note.y)) {
+      note.x = prevX;
+      note.y = prevY;
+      el.style.left = prevX + "px";
+      el.style.top = prevY + "px";
+    }
+    const list = load();
+    const s = list.find((s2) => s2.id === note.id);
+    if (s) {
+      s.x = note.x;
+      s.y = note.y;
+      save(list);
+    }
+  });
+  el.appendChild(header);
+  el.appendChild(del);
+  el.appendChild(textarea);
+  layer.appendChild(el);
+  return el;
+}
+function addSticky() {
+  const list = load();
+  if (list.length >= MAX) return;
+  const c = COLORS[colorIdx % COLORS.length];
+  colorIdx++;
+  const pos = clamp(
+    100 + Math.random() * (window.innerWidth - SIZE - 200),
+    100 + Math.random() * (window.innerHeight - SIZE - 200)
+  );
+  if (overlapsPanel(pos.x, pos.y)) {
+    pos.x = 60;
+    pos.y = 60;
+  }
+  const note = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+    x: pos.x,
+    y: pos.y,
+    text: "",
+    color: c.id
+  };
+  list.push(note);
+  save(list);
+  const layer = document.getElementById("stickyLayer");
+  if (layer) makeSticky(note, layer);
+}
+function initSticky() {
+  const layer = document.getElementById("stickyLayer");
+  const addBtn = document.getElementById("stickyAddBtn");
+  if (!layer || !addBtn) return;
+  const stickies = load();
+  colorIdx = stickies.length;
+  stickies.forEach((note) => makeSticky(note, layer));
+  addBtn.addEventListener("click", addSticky);
+}
+
 // src/main.ts
 function init() {
   loadPrefs();
@@ -1729,6 +1882,7 @@ function init() {
   initTodo();
   initNotes();
   initTimer();
+  initSticky();
   requestAnimationFrame(() => {
     applyBg(prefs.bg);
     applyPanelOpacity(prefs.opacity);

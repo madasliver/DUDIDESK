@@ -11,6 +11,7 @@ import { initWeather } from "./modules/weather";
 import { initTodo } from "./modules/todo";
 import { initNotes } from "./modules/notes";
 import { initTimer } from "./modules/timer";
+import { initSticky } from "./modules/sticky";
 
 function init(): void {
   loadPrefs();
@@ -30,6 +31,7 @@ function init(): void {
   initTodo();
   initNotes();
   initTimer();
+  initSticky();
 
   requestAnimationFrame(() => {
     applyBg(prefs.bg);
