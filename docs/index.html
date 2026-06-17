@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DudiDesk</title>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
-  <script type="module" crossorigin src="/DUDIDESK/assets/index-BoOnvyrP.js"></script>
-  <link rel="stylesheet" crossorigin href="/DUDIDESK/assets/index-D_IWj5hh.css">
+  <script type="module" crossorigin src="/DUDIDESK/assets/index-BuGeE1rE.js"></script>
+  <link rel="stylesheet" crossorigin href="/DUDIDESK/assets/index-C8-CWjzb.css">
 </head>
 <body>
   <canvas id="bgCanvas"></canvas>
@@ -51,6 +51,13 @@
           </div>
         </div>
         <div class="dd-section">
+          <div class="dd-label">CLOCK</div>
+          <div class="toggle-row" id="clockRow">
+            <button class="tog-btn active" data-clock="default">DEFAULT</button>
+            <button class="tog-btn" data-clock="analog">ANALOG</button>
+          </div>
+        </div>
+        <div class="dd-section">
           <div class="dd-label">PANEL OPACITY</div>
           <div class="slider-row">
             <input type="range" id="opacitySlider" min="0" max="10" step="1" value="4" />
@@ -69,9 +76,7 @@
         </div>
       </div>
     </div>
-    <span class="clock-time" id="clockTime"></span>
     <div class="topbar-right">
-      <span class="clock-date" id="clockDate"></span>
       <a class="weather-widget" id="weatherWidget" href="https://www.google.com/search?q=weather" target="_blank"></a>
       <div class="quicklinks">
         <a class="quicklink" href="https://outlook.live.com" target="_blank">OUTLOOK</a>

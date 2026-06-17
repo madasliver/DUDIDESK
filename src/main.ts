@@ -20,6 +20,7 @@ function init(): void {
   setActiveBtn("modeRow", prefs.mode);
   setActiveBtn("sizeRow", prefs.size);
   setActiveBtn("bgRow", prefs.bg);
+  setActiveBtn("clockRow", prefs.clockStyle);
 
   initSettings();
   initModal();

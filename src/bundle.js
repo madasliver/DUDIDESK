@@ -10,7 +10,10 @@ var DEFAULT_PREFS = {
   title: "DUDI",
   opacity: 4,
   tabs: DEFAULT_TABS.map((t) => ({ ...t })),
-  activeTab: DEFAULT_TAB_ID
+  activeTab: DEFAULT_TAB_ID,
+  clockStyle: "default",
+  clockX: -1,
+  clockY: 12
 };
 var DEFAULT_SHORTCUTS = [
   { type: "link", name: "UNI", url: "https://www.bht-berlin.de", col: 0, row: 0, tabId: DEFAULT_TAB_ID },
@@ -1036,7 +1039,7 @@ function applyPanelOpacity(val) {
   panel.style.borderColor = val === 0 ? "transparent" : `rgba(255,255,255,${alpha * 0.5 + 0.02})`;
 }
 function setActiveBtn(rowId, key) {
-  const attr = rowId === "modeRow" ? "mode" : rowId === "sizeRow" ? "size" : "bg";
+  const attr = rowId === "modeRow" ? "mode" : rowId === "sizeRow" ? "size" : rowId === "clockRow" ? "clock" : "bg";
   document.querySelectorAll(`#${rowId} .tog-btn`).forEach((b) => {
     const el = b;
     el.classList.toggle("active", el.dataset[attr] === key);
@@ -1078,6 +1081,163 @@ function initModal() {
   });
 }
 
+// src/modules/clock.ts
+var ANALOG_SIZE = 140;
+var widget = null;
+function pad(n) {
+  return String(n).padStart(2, "0");
+}
+function cssVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+function drawAnalog(ctx) {
+  const s = ANALOG_SIZE;
+  const cx = s / 2;
+  const cy = s / 2;
+  const r = s / 2 - 8;
+  const now = /* @__PURE__ */ new Date();
+  ctx.clearRect(0, 0, s, s);
+  const fg = cssVar("--fg");
+  const fg2 = cssVar("--fg2");
+  const fg3 = cssVar("--fg3");
+  ctx.strokeStyle = fg2;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.stroke();
+  for (let i = 0; i < 12; i++) {
+    const a = i * Math.PI / 6 - Math.PI / 2;
+    const inner = r - (i % 3 === 0 ? 12 : 8);
+    ctx.strokeStyle = i % 3 === 0 ? fg : fg3;
+    ctx.lineWidth = i % 3 === 0 ? 3 : 2;
+    ctx.beginPath();
+    ctx.moveTo(cx + inner * Math.cos(a), cy + inner * Math.sin(a));
+    ctx.lineTo(cx + (r - 3) * Math.cos(a), cy + (r - 3) * Math.sin(a));
+    ctx.stroke();
+  }
+  const h = now.getHours() % 12;
+  const m = now.getMinutes();
+  const sec = now.getSeconds();
+  ctx.lineCap = "butt";
+  const hA = (h + m / 60) * Math.PI / 6 - Math.PI / 2;
+  ctx.strokeStyle = fg;
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + r * 0.45 * Math.cos(hA), cy + r * 0.45 * Math.sin(hA));
+  ctx.stroke();
+  const mA = (m + sec / 60) * Math.PI / 30 - Math.PI / 2;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + r * 0.65 * Math.cos(mA), cy + r * 0.65 * Math.sin(mA));
+  ctx.stroke();
+  const sA = sec * Math.PI / 30 - Math.PI / 2;
+  ctx.strokeStyle = fg3;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + r * 0.78 * Math.cos(sA), cy + r * 0.78 * Math.sin(sA));
+  ctx.stroke();
+  ctx.fillStyle = fg;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+  ctx.fill();
+}
+function buildWidget() {
+  const el = document.createElement("div");
+  el.id = "clockWidget";
+  document.body.appendChild(el);
+  return el;
+}
+function renderContent(style) {
+  if (!widget) return;
+  widget.innerHTML = "";
+  if (style === "analog") {
+    const canvas = document.createElement("canvas");
+    canvas.className = "clock-canvas";
+    canvas.width = ANALOG_SIZE;
+    canvas.height = ANALOG_SIZE;
+    widget.appendChild(canvas);
+  } else {
+    const time = document.createElement("span");
+    time.className = "clock-time";
+    time.id = "clockTimeEl";
+    widget.appendChild(time);
+  }
+  const date = document.createElement("span");
+  date.className = "clock-date";
+  date.id = "clockDateEl";
+  widget.appendChild(date);
+}
+function positionWidget() {
+  if (!widget) return;
+  if (prefs.clockX < 0) {
+    widget.style.left = "50%";
+    widget.style.top = prefs.clockY + "px";
+    widget.style.transform = "translateX(-50%)";
+  } else {
+    widget.style.left = prefs.clockX + "px";
+    widget.style.top = prefs.clockY + "px";
+    widget.style.transform = "";
+  }
+}
+function attachDrag2() {
+  if (!widget) return;
+  let dragging2 = false;
+  let ox = 0, oy = 0;
+  widget.addEventListener("pointerdown", (e) => {
+    if (e.target.tagName === "CANVAS" || e.target.classList.contains("clock-time") || e.target.classList.contains("clock-date") || e.target === widget) {
+      dragging2 = true;
+      const rect = widget.getBoundingClientRect();
+      ox = e.clientX - rect.left;
+      oy = e.clientY - rect.top;
+      widget.style.transform = "";
+      widget.classList.add("clock-dragging");
+      widget.setPointerCapture(e.pointerId);
+    }
+  });
+  widget.addEventListener("pointermove", (e) => {
+    if (!dragging2) return;
+    const x = Math.max(0, Math.min(window.innerWidth - 80, e.clientX - ox));
+    const y = Math.max(0, Math.min(window.innerHeight - 40, e.clientY - oy));
+    widget.style.left = x + "px";
+    widget.style.top = y + "px";
+    prefs.clockX = x;
+    prefs.clockY = y;
+  });
+  widget.addEventListener("pointerup", () => {
+    if (!dragging2) return;
+    dragging2 = false;
+    widget.classList.remove("clock-dragging");
+    savePrefs();
+  });
+}
+function applyClockStyle(style) {
+  renderContent(style);
+}
+function initClock() {
+  widget = buildWidget();
+  renderContent(prefs.clockStyle);
+  positionWidget();
+  attachDrag2();
+  function tick() {
+    const now = /* @__PURE__ */ new Date();
+    if (prefs.clockStyle === "analog") {
+      const canvas = widget?.querySelector(".clock-canvas");
+      const ctx = canvas?.getContext("2d");
+      if (ctx) drawAnalog(ctx);
+    } else {
+      const timeEl = document.getElementById("clockTimeEl");
+      if (timeEl) timeEl.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    }
+    const dateEl = document.getElementById("clockDateEl");
+    if (dateEl) dateEl.textContent = `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${now.getFullYear()}`;
+  }
+  tick();
+  setInterval(tick, 1e3);
+}
+
 // src/modules/settings.ts
 var dropdown = () => document.getElementById("settingsDropdown");
 var savedState = null;
@@ -1087,6 +1247,7 @@ function openDropdown() {
   const v = prefs.opacity ?? 4;
   document.getElementById("opacitySlider").value = String(v);
   document.getElementById("opacityVal").textContent = String(v);
+  setActiveBtn("clockRow", prefs.clockStyle);
   dropdown().classList.add("open");
 }
 function closeDropdown() {
@@ -1099,12 +1260,15 @@ function revertUnsaved() {
   prefs.bg = savedState.bg;
   prefs.title = savedState.title;
   prefs.opacity = savedState.opacity;
+  prefs.clockStyle = savedState.clockStyle;
   applyTheme(prefs.mode, prefs.size);
   applyTitle(prefs.title);
   applyPanelOpacity(prefs.opacity);
+  applyClockStyle(prefs.clockStyle);
   setActiveBtn("modeRow", prefs.mode);
   setActiveBtn("sizeRow", prefs.size);
   setActiveBtn("bgRow", prefs.bg);
+  setActiveBtn("clockRow", prefs.clockStyle);
 }
 function initSettings() {
   document.getElementById("settingsBtn").addEventListener("click", (e) => {
@@ -1139,6 +1303,13 @@ function initSettings() {
     setActiveBtn("bgRow", prefs.bg);
     applyBg(prefs.bg);
   });
+  document.getElementById("clockRow").addEventListener("click", (e) => {
+    const b = e.target.closest(".tog-btn");
+    if (!b) return;
+    prefs.clockStyle = b.dataset.clock;
+    setActiveBtn("clockRow", prefs.clockStyle);
+    applyClockStyle(prefs.clockStyle);
+  });
   document.getElementById("titleInput").addEventListener("input", (e) => {
     applyTitle(e.target.value.trim() || "DUDI");
   });
@@ -1156,21 +1327,6 @@ function initSettings() {
     applyPanelOpacity(prefs.opacity);
     closeDropdown();
   });
-}
-
-// src/modules/clock.ts
-function initClock() {
-  const timeEl = document.getElementById("clockTime");
-  const dateEl = document.getElementById("clockDate");
-  if (!timeEl && !dateEl) return;
-  const pad2 = (n) => String(n).padStart(2, "0");
-  function tick() {
-    const now = /* @__PURE__ */ new Date();
-    if (timeEl) timeEl.textContent = `${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
-    if (dateEl) dateEl.textContent = `${pad2(now.getDate())}.${pad2(now.getMonth() + 1)}.${now.getFullYear()}`;
-  }
-  tick();
-  setInterval(tick, 1e3);
 }
 
 // src/modules/weather.ts
@@ -1544,7 +1700,7 @@ var alarmCtx = null;
 var alarmLoop = 0;
 var masterGain = null;
 var volume = 0.5;
-function pad(n) {
+function pad2(n) {
   return n.toString().padStart(2, "0");
 }
 function updateDisplay(sec) {
@@ -1552,7 +1708,7 @@ function updateDisplay(sec) {
   if (display) {
     const m = Math.floor(sec / 60);
     const s = sec % 60;
-    display.textContent = `${pad(m)}:${pad(s)}`;
+    display.textContent = `${pad2(m)}:${pad2(s)}`;
   }
 }
 function playMelody(ctx) {
@@ -1872,6 +2028,7 @@ function init() {
   setActiveBtn("modeRow", prefs.mode);
   setActiveBtn("sizeRow", prefs.size);
   setActiveBtn("bgRow", prefs.bg);
+  setActiveBtn("clockRow", prefs.clockStyle);
   initSettings();
   initModal();
   initFolder();

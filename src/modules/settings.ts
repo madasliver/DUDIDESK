@@ -1,8 +1,9 @@
-import type { ModeId, SizeId, BgId } from "../types";
+import type { ModeId, SizeId, BgId, ClockStyle } from "../types";
 import { prefs, savePrefs } from "./state";
 import { applyTheme, applyTitle, applyPanelOpacity, setActiveBtn } from "./theme";
 import { applyBg } from "./background";
 import { render } from "./render";
+import { applyClockStyle } from "./clock";
 
 const dropdown = () => document.getElementById("settingsDropdown")!;
 let savedState: typeof prefs | null = null;
@@ -13,6 +14,7 @@ function openDropdown(): void {
   const v = prefs.opacity ?? 4;
   (document.getElementById("opacitySlider") as HTMLInputElement).value = String(v);
   document.getElementById("opacityVal")!.textContent = String(v);
+  setActiveBtn("clockRow", prefs.clockStyle);
   dropdown().classList.add("open");
 }
 
@@ -27,12 +29,15 @@ function revertUnsaved(): void {
   prefs.bg = savedState.bg;
   prefs.title = savedState.title;
   prefs.opacity = savedState.opacity;
+  prefs.clockStyle = savedState.clockStyle;
   applyTheme(prefs.mode, prefs.size);
   applyTitle(prefs.title);
   applyPanelOpacity(prefs.opacity);
+  applyClockStyle(prefs.clockStyle);
   setActiveBtn("modeRow", prefs.mode);
   setActiveBtn("sizeRow", prefs.size);
   setActiveBtn("bgRow", prefs.bg);
+  setActiveBtn("clockRow", prefs.clockStyle);
 }
 
 export function initSettings(): void {
@@ -74,6 +79,14 @@ export function initSettings(): void {
     prefs.bg = b.dataset.bg as BgId;
     setActiveBtn("bgRow", prefs.bg);
     applyBg(prefs.bg);
+  });
+
+  document.getElementById("clockRow")!.addEventListener("click", e => {
+    const b = (e.target as HTMLElement).closest<HTMLElement>(".tog-btn");
+    if (!b) return;
+    prefs.clockStyle = b.dataset.clock as ClockStyle;
+    setActiveBtn("clockRow", prefs.clockStyle);
+    applyClockStyle(prefs.clockStyle);
   });
 
   document.getElementById("titleInput")!.addEventListener("input", e => {

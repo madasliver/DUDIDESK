@@ -72,6 +72,7 @@ export function setActiveBtn(rowId: string, key: string): void {
   const attr =
     rowId === "modeRow" ? "mode" :
     rowId === "sizeRow" ? "size" :
+    rowId === "clockRow" ? "clock" :
     "bg";
   document.querySelectorAll(`#${rowId} .tog-btn`).forEach(b => {
     const el = b as HTMLElement;

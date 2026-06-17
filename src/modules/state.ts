@@ -15,6 +15,9 @@ const DEFAULT_PREFS: Prefs = {
   opacity: 4,
   tabs: DEFAULT_TABS.map(t => ({ ...t })),
   activeTab: DEFAULT_TAB_ID,
+  clockStyle: "default",
+  clockX: -1,
+  clockY: 12,
 };
 
 const DEFAULT_SHORTCUTS: Item[] = [

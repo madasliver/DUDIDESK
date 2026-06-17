@@ -36,6 +36,7 @@ export interface Tab {
 export type ModeId = "dark" | "mid" | "light";
 export type SizeId = "s" | "m" | "l" | "xl";
 export type BgId = "grid" | "dots" | "plus" | "aliens";
+export type ClockStyle = "default" | "analog";
 export type FolderColorId =
   | "none" | "red" | "orange" | "yellow" | "green" | "blue" | "purple";
 
@@ -47,6 +48,9 @@ export interface Prefs {
   opacity: number; // 0-10
   tabs: Tab[];
   activeTab: string;
+  clockStyle: ClockStyle;
+  clockX: number;
+  clockY: number;
 }
 
 // ── Theme & Size values ──────────────────────────────────────
