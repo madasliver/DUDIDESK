@@ -10,6 +10,7 @@ import { initClock } from "./modules/clock";
 import { initWeather } from "./modules/weather";
 import { initTodo } from "./modules/todo";
 import { initNotes } from "./modules/notes";
+import { initTimer } from "./modules/timer";
 
 function init(): void {
   loadPrefs();
@@ -28,6 +29,7 @@ function init(): void {
   initWeather();
   initTodo();
   initNotes();
+  initTimer();
 
   requestAnimationFrame(() => {
     applyBg(prefs.bg);

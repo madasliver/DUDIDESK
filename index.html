@@ -147,6 +147,22 @@
       </div>
       <button class="bw-btn" id="notesBtn">NOTES</button>
     </div>
+    <div class="bw-item">
+      <div class="bw-panel timer-panel" id="timerPanel">
+        <div class="bw-panel-header">// TIMER</div>
+        <div class="timer-display" id="timerDisplay">00:00</div>
+        <div class="timer-input-row">
+          <input type="number" id="timerMin" min="0" max="99" value="5" />
+          <span class="timer-sep">:</span>
+          <input type="number" id="timerSec" min="0" max="59" value="0" />
+        </div>
+        <div class="timer-actions">
+          <button id="timerStartBtn" class="btn-add">START</button>
+          <button id="timerStopBtn" class="btn-cancel">RESET</button>
+        </div>
+      </div>
+      <button class="bw-btn" id="timerBtn">TIMER</button>
+    </div>
   </div>
 
   <div id="dragGhost"></div>

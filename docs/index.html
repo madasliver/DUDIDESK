@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DudiDesk</title>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
-  <script type="module" crossorigin src="/DUDIDESK/assets/index-MkdKGm-v.js"></script>
-  <link rel="stylesheet" crossorigin href="/DUDIDESK/assets/index-B23fnM8O.css">
+  <script type="module" crossorigin src="/DUDIDESK/assets/index-CZNuBGEJ.js"></script>
+  <link rel="stylesheet" crossorigin href="/DUDIDESK/assets/index-CVRxiidt.css">
 </head>
 <body>
   <canvas id="bgCanvas"></canvas>
@@ -147,6 +147,22 @@
         <textarea class="notes-textarea" id="notesTextarea" placeholder="..."></textarea>
       </div>
       <button class="bw-btn" id="notesBtn">NOTES</button>
+    </div>
+    <div class="bw-item">
+      <div class="bw-panel timer-panel" id="timerPanel">
+        <div class="bw-panel-header">// TIMER</div>
+        <div class="timer-display" id="timerDisplay">00:00</div>
+        <div class="timer-input-row">
+          <input type="number" id="timerMin" min="0" max="99" value="5" />
+          <span class="timer-sep">:</span>
+          <input type="number" id="timerSec" min="0" max="59" value="0" />
+        </div>
+        <div class="timer-actions">
+          <button id="timerStartBtn" class="btn-add">START</button>
+          <button id="timerStopBtn" class="btn-cancel">RESET</button>
+        </div>
+      </div>
+      <button class="bw-btn" id="timerBtn">TIMER</button>
     </div>
   </div>
 

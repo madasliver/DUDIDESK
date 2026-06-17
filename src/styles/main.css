@@ -409,7 +409,7 @@ body {
 
 .bw-btn {
   background: var(--bg2); border: var(--px) solid var(--fg3); color: var(--fg2);
-  font-family: 'Press Start 2P', monospace; font-size: 7px; padding: 8px 11px;
+  font-family: 'Press Start 2P', monospace; font-size: 10px; padding: 12px 16px;
   cursor: pointer; letter-spacing: 1px; white-space: nowrap;
   transition: border-color .1s, color .1s;
 }
@@ -545,6 +545,33 @@ body {
 .bw-sz-l .notes-textarea { height: 560px; }
 .notes-textarea::placeholder { color: var(--fg3); }
 
+/* TIMER */
+.timer-panel { width: 280px; text-align: center; }
+.timer-display {
+  font-size: 32px; color: var(--fg); padding: 24px 12px 16px;
+  letter-spacing: 6px; font-family: 'Press Start 2P', monospace;
+}
+.timer-input-row {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 0 12px 16px;
+}
+.timer-input-row input {
+  width: 56px; background: var(--bg); border: var(--px) solid var(--fg3);
+  color: var(--fg); font-family: 'Press Start 2P', monospace; font-size: 14px;
+  padding: 8px; text-align: center; outline: none; caret-color: var(--fg);
+  -moz-appearance: textfield; appearance: textfield;
+}
+.timer-input-row input::-webkit-inner-spin-button,
+.timer-input-row input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.timer-input-row input:focus { border-color: var(--border); }
+.timer-input-row input:disabled { opacity: 0.4; }
+.timer-sep { font-size: 18px; color: var(--fg2); }
+.timer-actions {
+  display: flex; gap: 8px; padding: 12px; border-top: var(--px) solid var(--fg3);
+  justify-content: center;
+}
+.timer-actions button { flex: 1; }
+
 /* ── MOBILE ──────────────────────────────────────────────── */
 @media (max-width: 480px) {
   body { gap: 16px; padding-top: 60px; justify-content: flex-start; }
@@ -601,7 +628,9 @@ body {
   /* Bottom dock: full-width, stacked */
   .bw-dock { left: 16px; right: 16px; gap: 6px; }
   .bw-item { width: 100%; }
-  .bw-btn { width: 100%; text-align: center; font-size: 8px; padding: 10px; }
+  .bw-btn { width: 100%; text-align: center; font-size: 9px; padding: 10px; }
+  .timer-panel { width: 100% !important; }
+  .timer-display { font-size: 24px; padding: 16px 12px 12px; }
 
   /* Panels: full width, shorter */
   .bw-panel { min-width: 0 !important; width: 100% !important; max-width: none !important; }

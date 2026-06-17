@@ -756,9 +756,9 @@ async function deleteTab(id) {
   const tab = { ...prefs.tabs[idx] };
   const list = loadShortcuts();
   const tabItems = list.filter((item) => tabOf(item) === id);
-  const remaining = list.filter((item) => tabOf(item) !== id);
+  const remaining2 = list.filter((item) => tabOf(item) !== id);
   pushUndo({ type: "tab", tab, items: tabItems });
-  saveShortcuts(remaining);
+  saveShortcuts(remaining2);
   prefs.tabs.splice(idx, 1);
   if (prefs.activeTab === id) prefs.activeTab = prefs.tabs[0].id;
   savePrefs();
@@ -1163,11 +1163,11 @@ function initClock() {
   const timeEl = document.getElementById("clockTime");
   const dateEl = document.getElementById("clockDate");
   if (!timeEl && !dateEl) return;
-  const pad = (n) => String(n).padStart(2, "0");
+  const pad2 = (n) => String(n).padStart(2, "0");
   function tick() {
     const now = /* @__PURE__ */ new Date();
-    if (timeEl) timeEl.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-    if (dateEl) dateEl.textContent = `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${now.getFullYear()}`;
+    if (timeEl) timeEl.textContent = `${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
+    if (dateEl) dateEl.textContent = `${pad2(now.getDate())}.${pad2(now.getMonth() + 1)}.${now.getFullYear()}`;
   }
   tick();
   setInterval(tick, 1e3);
@@ -1537,6 +1537,142 @@ function initNotes() {
   });
 }
 
+// src/modules/timer.ts
+var remaining = 0;
+var interval = 0;
+var audioCtx = null;
+var alarmNodes = null;
+function pad(n) {
+  return n.toString().padStart(2, "0");
+}
+function updateDisplay(sec) {
+  const display = document.getElementById("timerDisplay");
+  if (display) {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    display.textContent = `${pad(m)}:${pad(s)}`;
+  }
+}
+function startAlarm() {
+  audioCtx = new AudioContext();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "square";
+  osc.frequency.value = 440;
+  gain.gain.value = 0.15;
+  const now = audioCtx.currentTime;
+  for (let i = 0; i < 200; i++) {
+    osc.frequency.setValueAtTime(i % 2 === 0 ? 440 : 880, now + i * 0.2);
+  }
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  alarmNodes = { osc, gain };
+}
+function stopAlarm() {
+  if (alarmNodes) {
+    alarmNodes.osc.stop();
+    alarmNodes.gain.disconnect();
+    alarmNodes = null;
+  }
+  if (audioCtx) {
+    void audioCtx.close();
+    audioCtx = null;
+  }
+}
+function setRunning(running) {
+  const startBtn = document.getElementById("timerStartBtn");
+  const stopBtn = document.getElementById("timerStopBtn");
+  const minInput = document.getElementById("timerMin");
+  const secInput = document.getElementById("timerSec");
+  if (startBtn) startBtn.textContent = running ? "PAUSE" : "START";
+  if (stopBtn) stopBtn.textContent = running ? "STOP" : "RESET";
+  if (minInput) minInput.disabled = running;
+  if (secInput) secInput.disabled = running;
+}
+function showAlarmOverlay() {
+  let overlay = document.querySelector(".timer-alarm-overlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.className = "confirm-overlay timer-alarm-overlay";
+    document.body.appendChild(overlay);
+  }
+  overlay.innerHTML = `
+    <div class="confirm-box">
+      <div class="confirm-msg">// TIME'S UP!</div>
+      <div class="confirm-actions">
+        <button class="btn-add" id="timerDismissBtn">DISMISS</button>
+      </div>
+    </div>`;
+  overlay.classList.add("open");
+  overlay.querySelector("#timerDismissBtn").addEventListener("click", () => {
+    overlay.classList.remove("open");
+    stopAlarm();
+  });
+}
+function initTimer() {
+  const btn = document.getElementById("timerBtn");
+  const panel = document.getElementById("timerPanel");
+  const startBtn = document.getElementById("timerStartBtn");
+  const stopBtn = document.getElementById("timerStopBtn");
+  const minInput = document.getElementById("timerMin");
+  const secInput = document.getElementById("timerSec");
+  if (!btn || !panel || !startBtn || !stopBtn || !minInput || !secInput) return;
+  panel.addEventListener("click", (e) => e.stopPropagation());
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const opening = !panel.classList.contains("open");
+    document.getElementById("todoPanel")?.classList.remove("open");
+    document.getElementById("notesPanel")?.classList.remove("open");
+    panel.classList.toggle("open", opening);
+  });
+  let paused = false;
+  startBtn.addEventListener("click", () => {
+    if (interval && !paused) {
+      clearInterval(interval);
+      interval = 0;
+      paused = true;
+      startBtn.textContent = "START";
+      return;
+    }
+    if (paused) {
+      paused = false;
+    } else {
+      const m = Math.max(0, parseInt(minInput.value) || 0);
+      const s = Math.max(0, Math.min(59, parseInt(secInput.value) || 0));
+      remaining = m * 60 + s;
+      if (remaining <= 0) return;
+    }
+    setRunning(true);
+    interval = window.setInterval(() => {
+      remaining--;
+      updateDisplay(remaining);
+      if (remaining <= 0) {
+        clearInterval(interval);
+        interval = 0;
+        paused = false;
+        setRunning(false);
+        updateDisplay(0);
+        startAlarm();
+        showAlarmOverlay();
+      }
+    }, 1e3);
+  });
+  stopBtn.addEventListener("click", () => {
+    clearInterval(interval);
+    interval = 0;
+    paused = false;
+    remaining = 0;
+    stopAlarm();
+    setRunning(false);
+    updateDisplay(0);
+  });
+  document.addEventListener("click", (e) => {
+    if (!panel.contains(e.target) && e.target !== btn)
+      panel.classList.remove("open");
+  });
+}
+
 // src/main.ts
 function init() {
   loadPrefs();
@@ -1554,6 +1690,7 @@ function init() {
   initWeather();
   initTodo();
   initNotes();
+  initTimer();
   requestAnimationFrame(() => {
     applyBg(prefs.bg);
     applyPanelOpacity(prefs.opacity);
