@@ -1976,12 +1976,29 @@ function makeSticky(note, layer) {
   del.style.color = c.text;
   del.addEventListener("click", (e) => {
     e.stopPropagation();
-    el.classList.add("sticky-falling");
-    el.addEventListener("animationend", () => {
+    el.style.pointerEvents = "none";
+    const dir = 1;
+    const drift = Math.round(40 + Math.random() * 80) * dir;
+    const spin = Math.round(8 + Math.random() * 20) * dir;
+    const dur = 1400 + Math.round(Math.random() * 800);
+    const frames = [
+      { transform: "translateY(0) translateX(0) rotate(0deg)", offset: 0 },
+      { transform: `translateY(70px) translateX(${drift * 0.2}px) rotate(${spin * 0.4}deg)`, offset: 0.15 },
+      { transform: `translateY(200px) translateX(${drift * 0.5}px) rotate(${-spin * 0.6}deg)`, offset: 0.3 },
+      { transform: `translateY(420px) translateX(${drift * 0.8}px) rotate(${spin * 0.8}deg)`, offset: 0.5 },
+      { transform: `translateY(700px) translateX(${drift}px) rotate(${-spin}deg)`, offset: 0.7 },
+      { transform: `translateY(120vh) translateX(${drift * 1.2}px) rotate(${spin * 1.3}deg)`, offset: 1 }
+    ];
+    const anim = el.animate(frames, {
+      duration: dur,
+      easing: "cubic-bezier(0.15, 0, 0.9, 0.4)",
+      fill: "forwards"
+    });
+    anim.onfinish = () => {
       el.remove();
       const list = load().filter((s) => s.id !== note.id);
       save(list);
-    });
+    };
   });
   const textarea = document.createElement("textarea");
   textarea.className = "sticky-text";
