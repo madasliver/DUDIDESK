@@ -1214,6 +1214,12 @@ function attachDrag2() {
   if (!widget) return;
   let dragging2 = false;
   let ox = 0, oy = 0;
+  widget.addEventListener("dblclick", () => {
+    prefs.clockX = -1;
+    prefs.clockY = 12;
+    positionWidget();
+    savePrefs();
+  });
   widget.addEventListener("pointerdown", (e) => {
     dragging2 = true;
     const rect = widget.getBoundingClientRect();
