@@ -1,7 +1,8 @@
+const ALARM_URL = "https://www.beepbox.co/player/#song=9n31s0k0l00e03t4Ia7g0cj07r3i0o432T8v0u08f20r22c1q010d02x006W7E0T1v1u35f0qwx10l611d08A6F0B0Q05c0Pa660E2bi626T1v1uc4f0q8111d23A0F4B4Q5000Pff00E0T4v1uf0f0q011z6666ji8k8k3jSBKSJJAArriiiiii07JCABrzrrrrrrr00YrkqHrsrrrrjr005zrAqzrjzrrqr1jRjrqGGrrzsrsA099ijrABJJJIAzrrtirqrqjqixzsrAjrqjiqaqqysttAJqjikikrizrHtBJJAzArzrIsRCITKSS099ijrAJS____Qg99habbCAYrDzh00E0b4h4000000g0000000100000000400000000p1oIR_QE4xwi62-17y9sRM00000";
+
 let remaining = 0;
 let interval = 0;
-let audioCtx: AudioContext | null = null;
-let alarmNodes: { osc: OscillatorNode; gain: GainNode } | null = null;
+let alarmIframe: HTMLIFrameElement | null = null;
 
 function pad(n: number): string {
   return n.toString().padStart(2, "0");
@@ -17,34 +18,17 @@ function updateDisplay(sec: number): void {
 }
 
 function startAlarm(): void {
-  audioCtx = new AudioContext();
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.type = "square";
-  osc.frequency.value = 440;
-  gain.gain.value = 0.15;
-
-  // retro beep pattern: alternate 440/880 Hz every 0.2s
-  const now = audioCtx.currentTime;
-  for (let i = 0; i < 200; i++) {
-    osc.frequency.setValueAtTime(i % 2 === 0 ? 440 : 880, now + i * 0.2);
-  }
-
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start();
-  alarmNodes = { osc, gain };
+  alarmIframe = document.createElement("iframe");
+  alarmIframe.src = ALARM_URL;
+  alarmIframe.allow = "autoplay";
+  alarmIframe.style.cssText = "position:fixed;width:0;height:0;border:none;opacity:0;pointer-events:none;";
+  document.body.appendChild(alarmIframe);
 }
 
 function stopAlarm(): void {
-  if (alarmNodes) {
-    alarmNodes.osc.stop();
-    alarmNodes.gain.disconnect();
-    alarmNodes = null;
-  }
-  if (audioCtx) {
-    void audioCtx.close();
-    audioCtx = null;
+  if (alarmIframe) {
+    alarmIframe.remove();
+    alarmIframe = null;
   }
 }
 
@@ -103,7 +87,6 @@ export function initTimer(): void {
 
   startBtn.addEventListener("click", () => {
     if (interval && !paused) {
-      // pause
       clearInterval(interval);
       interval = 0;
       paused = true;
@@ -112,10 +95,8 @@ export function initTimer(): void {
     }
 
     if (paused) {
-      // resume
       paused = false;
     } else {
-      // fresh start
       const m = Math.max(0, parseInt(minInput.value) || 0);
       const s = Math.max(0, Math.min(59, parseInt(secInput.value) || 0));
       remaining = m * 60 + s;
