@@ -1538,10 +1538,10 @@ function initNotes() {
 }
 
 // src/modules/timer.ts
-var ALARM_URL = "https://www.beepbox.co/player/#song=9n31s0k0l00e03t4Ia7g0cj07r3i0o432T8v0u08f20r22c1q010d02x006W7E0T1v1u35f0qwx10l611d08A6F0B0Q05c0Pa660E2bi626T1v1uc4f0q8111d23A0F4B4Q5000Pff00E0T4v1uf0f0q011z6666ji8k8k3jSBKSJJAArriiiiii07JCABrzrrrrrrr00YrkqHrsrrrrjr005zrAqzrjzrrqr1jRjrqGGrrzsrsA099ijrABJJJIAzrrtirqrqjqixzsrAjrqjiqaqqysttAJqjikikrizrHtBJJAzArzrIsRCITKSS099ijrAJS____Qg99habbCAYrDzh00E0b4h4000000g0000000100000000400000000p1oIR_QE4xwi62-17y9sRM00000";
 var remaining = 0;
 var interval = 0;
-var alarmIframe = null;
+var alarmCtx = null;
+var alarmLoop = 0;
 function pad(n) {
   return n.toString().padStart(2, "0");
 }
@@ -1553,17 +1553,63 @@ function updateDisplay(sec) {
     display.textContent = `${pad(m)}:${pad(s)}`;
   }
 }
+function playMelody(ctx) {
+  const notes = [
+    523,
+    659,
+    784,
+    1047,
+    // C5 E5 G5 C6 — ascending
+    0,
+    // pause
+    523,
+    659,
+    784,
+    1047,
+    // repeat
+    0,
+    // pause
+    880,
+    784,
+    659,
+    523,
+    // A5 G5 E5 C5 — descending
+    0
+    // pause
+  ];
+  const dur = 0.1;
+  const gap = 0.05;
+  const step = dur + gap;
+  const gain = ctx.createGain();
+  gain.gain.value = 0.12;
+  gain.connect(ctx.destination);
+  notes.forEach((freq, i) => {
+    if (freq === 0) return;
+    const osc = ctx.createOscillator();
+    osc.type = "square";
+    osc.frequency.value = freq;
+    const noteGain = ctx.createGain();
+    noteGain.gain.setValueAtTime(1, ctx.currentTime + i * step);
+    noteGain.gain.setValueAtTime(0, ctx.currentTime + i * step + dur);
+    osc.connect(noteGain);
+    noteGain.connect(gain);
+    osc.start(ctx.currentTime + i * step);
+    osc.stop(ctx.currentTime + i * step + dur + 0.01);
+  });
+}
 function startAlarm() {
-  alarmIframe = document.createElement("iframe");
-  alarmIframe.src = ALARM_URL;
-  alarmIframe.allow = "autoplay";
-  alarmIframe.style.cssText = "position:fixed;width:0;height:0;border:none;opacity:0;pointer-events:none;";
-  document.body.appendChild(alarmIframe);
+  alarmCtx = new AudioContext();
+  playMelody(alarmCtx);
+  alarmLoop = window.setInterval(() => {
+    if (alarmCtx) playMelody(alarmCtx);
+  }, 2300);
 }
 function stopAlarm() {
-  if (alarmIframe) {
-    alarmIframe.remove();
-    alarmIframe = null;
+  clearInterval(alarmLoop);
+  alarmLoop = 0;
+  if (alarmCtx) {
+    void alarmCtx.close();
+    alarmCtx = null;
   }
 }
 function setRunning(running) {
