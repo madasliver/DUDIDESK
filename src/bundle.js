@@ -1293,9 +1293,7 @@ function initClock() {
 
 // src/modules/settings.ts
 var dropdown = () => document.getElementById("settingsDropdown");
-var savedState = null;
 function openDropdown() {
-  savedState = { ...prefs };
   document.getElementById("titleInput").value = prefs.title || "DUDI";
   const v = prefs.opacity ?? 4;
   document.getElementById("opacitySlider").value = String(v);
@@ -1306,23 +1304,6 @@ function openDropdown() {
 function closeDropdown() {
   dropdown().classList.remove("open");
 }
-function revertUnsaved() {
-  if (!savedState) return;
-  prefs.mode = savedState.mode;
-  prefs.size = savedState.size;
-  prefs.bg = savedState.bg;
-  prefs.title = savedState.title;
-  prefs.opacity = savedState.opacity;
-  prefs.clockStyle = savedState.clockStyle;
-  applyTheme(prefs.mode, prefs.size);
-  applyTitle(prefs.title);
-  applyPanelOpacity(prefs.opacity);
-  applyClockStyle(prefs.clockStyle);
-  setActiveBtn("modeRow", prefs.mode);
-  setActiveBtn("sizeRow", prefs.size);
-  setActiveBtn("bgRow", prefs.bg);
-  setActiveBtn("clockRow", prefs.clockStyle);
-}
 function initSettings() {
   document.getElementById("settingsBtn").addEventListener("click", (e) => {
     e.stopPropagation();
@@ -1330,7 +1311,6 @@ function initSettings() {
   });
   document.addEventListener("click", (e) => {
     if (!document.querySelector(".settings-wrap").contains(e.target) && dropdown().classList.contains("open")) {
-      revertUnsaved();
       closeDropdown();
     }
   });
@@ -1340,6 +1320,7 @@ function initSettings() {
     prefs.mode = b.dataset.mode;
     setActiveBtn("modeRow", prefs.mode);
     applyTheme(prefs.mode, prefs.size);
+    savePrefs();
   });
   document.getElementById("sizeRow").addEventListener("click", (e) => {
     const b = e.target.closest(".tog-btn");
@@ -1348,6 +1329,7 @@ function initSettings() {
     setActiveBtn("sizeRow", prefs.size);
     applyTheme(prefs.mode, prefs.size);
     render();
+    savePrefs();
   });
   document.getElementById("bgRow").addEventListener("click", (e) => {
     const b = e.target.closest(".tog-btn");
@@ -1355,6 +1337,7 @@ function initSettings() {
     prefs.bg = b.dataset.bg;
     setActiveBtn("bgRow", prefs.bg);
     applyBg(prefs.bg);
+    savePrefs();
   });
   document.getElementById("clockRow").addEventListener("click", (e) => {
     const b = e.target.closest(".tog-btn");
@@ -1362,23 +1345,20 @@ function initSettings() {
     prefs.clockStyle = b.dataset.clock;
     setActiveBtn("clockRow", prefs.clockStyle);
     applyClockStyle(prefs.clockStyle);
+    savePrefs();
   });
   document.getElementById("titleInput").addEventListener("input", (e) => {
-    applyTitle(e.target.value.trim() || "DUDI");
+    const t = e.target.value.trim().toUpperCase() || "DUDI";
+    prefs.title = t;
+    applyTitle(t);
+    savePrefs();
   });
   document.getElementById("opacitySlider").addEventListener("input", (e) => {
     const v = parseInt(e.target.value);
+    prefs.opacity = v;
     document.getElementById("opacityVal").textContent = String(v);
     applyPanelOpacity(v);
-  });
-  document.getElementById("btnSave").addEventListener("click", () => {
-    const t = document.getElementById("titleInput").value.trim().toUpperCase();
-    if (t) prefs.title = t;
-    prefs.opacity = parseInt(document.getElementById("opacitySlider").value);
     savePrefs();
-    applyTitle(prefs.title);
-    applyPanelOpacity(prefs.opacity);
-    closeDropdown();
   });
 }
 
