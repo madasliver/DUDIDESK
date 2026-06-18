@@ -60,12 +60,14 @@ export function applyTitle(title: string): void {
 }
 
 export function applyPanelOpacity(val: number): void {
-  const alpha = (val / 10) * 0.18; // 0 → invisible, 10 → 0.18 alpha
+  const alpha = (val / 10) * 0.18;
   const panel = document.querySelector(".icon-panel") as HTMLElement;
   if (!panel) return;
-  panel.style.background = `rgba(255,255,255,${alpha})`;
+  const light = prefs.mode === "light";
+  const ch = light ? "0,0,0" : "255,255,255";
+  panel.style.background = `rgba(${ch},${light ? alpha * 1.8 : alpha})`;
   panel.style.borderColor =
-    val === 0 ? "transparent" : `rgba(255,255,255,${alpha * 0.5 + 0.02})`;
+    val === 0 ? "transparent" : `rgba(${ch},${alpha * 0.5 + 0.02})`;
 }
 
 export function setActiveBtn(rowId: string, key: string): void {

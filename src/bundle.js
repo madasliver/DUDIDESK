@@ -1035,8 +1035,10 @@ function applyPanelOpacity(val) {
   const alpha = val / 10 * 0.18;
   const panel = document.querySelector(".icon-panel");
   if (!panel) return;
-  panel.style.background = `rgba(255,255,255,${alpha})`;
-  panel.style.borderColor = val === 0 ? "transparent" : `rgba(255,255,255,${alpha * 0.5 + 0.02})`;
+  const light = prefs.mode === "light";
+  const ch = light ? "0,0,0" : "255,255,255";
+  panel.style.background = `rgba(${ch},${light ? alpha * 1.8 : alpha})`;
+  panel.style.borderColor = val === 0 ? "transparent" : `rgba(${ch},${alpha * 0.5 + 0.02})`;
 }
 function setActiveBtn(rowId, key) {
   const attr = rowId === "modeRow" ? "mode" : rowId === "sizeRow" ? "size" : rowId === "clockRow" ? "clock" : "bg";
