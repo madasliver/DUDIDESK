@@ -724,13 +724,13 @@ function toggleColorPicker(tab, btn) {
 }
 function showConfirm(msg) {
   return new Promise((resolve) => {
-    let overlay = document.querySelector(".confirm-overlay");
-    if (!overlay) {
-      overlay = document.createElement("div");
-      overlay.className = "confirm-overlay";
-      document.body.appendChild(overlay);
+    let overlay2 = document.querySelector(".confirm-overlay");
+    if (!overlay2) {
+      overlay2 = document.createElement("div");
+      overlay2.className = "confirm-overlay";
+      document.body.appendChild(overlay2);
     }
-    overlay.innerHTML = `
+    overlay2.innerHTML = `
       <div class="confirm-box">
         <div class="confirm-msg">${msg}</div>
         <div class="confirm-actions">
@@ -738,15 +738,15 @@ function showConfirm(msg) {
           <button class="btn-add">DELETE</button>
         </div>
       </div>`;
-    overlay.classList.add("open");
+    overlay2.classList.add("open");
     const close = (result) => {
-      overlay.classList.remove("open");
+      overlay2.classList.remove("open");
       resolve(result);
     };
-    overlay.querySelector(".btn-cancel").addEventListener("click", () => close(false));
-    overlay.querySelector(".btn-add").addEventListener("click", () => close(true));
-    overlay.addEventListener("click", (e) => {
-      if (e.target === overlay) close(false);
+    overlay2.querySelector(".btn-cancel").addEventListener("click", () => close(false));
+    overlay2.querySelector(".btn-add").addEventListener("click", () => close(true));
+    overlay2.addEventListener("click", (e) => {
+      if (e.target === overlay2) close(false);
     });
   });
 }
@@ -1812,22 +1812,22 @@ function setRunning(running) {
   if (secInput) secInput.disabled = running;
 }
 function showAlarmOverlay() {
-  let overlay = document.querySelector(".timer-alarm-overlay");
-  if (!overlay) {
-    overlay = document.createElement("div");
-    overlay.className = "confirm-overlay timer-alarm-overlay";
-    document.body.appendChild(overlay);
+  let overlay2 = document.querySelector(".timer-alarm-overlay");
+  if (!overlay2) {
+    overlay2 = document.createElement("div");
+    overlay2.className = "confirm-overlay timer-alarm-overlay";
+    document.body.appendChild(overlay2);
   }
-  overlay.innerHTML = `
+  overlay2.innerHTML = `
     <div class="confirm-box">
       <div class="confirm-msg">// TIME'S UP!</div>
       <div class="confirm-actions">
         <button class="btn-add" id="timerDismissBtn">DISMISS</button>
       </div>
     </div>`;
-  overlay.classList.add("open");
-  overlay.querySelector("#timerDismissBtn").addEventListener("click", () => {
-    overlay.classList.remove("open");
+  overlay2.classList.add("open");
+  overlay2.querySelector("#timerDismissBtn").addEventListener("click", () => {
+    overlay2.classList.remove("open");
     stopAlarm();
   });
 }
@@ -2076,6 +2076,121 @@ function initSticky() {
   addBtn.addEventListener("click", addSticky);
 }
 
+// src/modules/tutorial.ts
+var STEPS = [
+  {
+    title: "WELCOME TO DUDIDESK!",
+    text: "Your personal retro start page. Let me show you around!",
+    selector: ".wordmark"
+  },
+  {
+    title: "YOUR SHORTCUTS",
+    text: "Drag icons to reposition them. Click the + button below to add new shortcuts. Hover and hit X to remove.",
+    selector: ".icon-panel"
+  },
+  {
+    title: "FOLDERS",
+    text: "Long-press an icon and hold it over another for 500ms to merge them into a folder. Click a folder to open it.",
+    selector: ".icon-panel"
+  },
+  {
+    title: "TABS",
+    text: "Organize your shortcuts in tabs. Double-click to rename, drag to reorder. The undo button restores deleted tabs and icons.",
+    selector: ".tab-bar"
+  },
+  {
+    title: "SETTINGS",
+    text: "Switch between dark, mid and light themes. Change icon size, background pattern, panel opacity and your custom title.",
+    selector: ".settings-btn"
+  },
+  {
+    title: "TOOLS",
+    text: "TO DO for tasks, NOTES with multiple tabs, and a TIMER with alarm \u2014 find them in the bottom-right corner.",
+    selector: ".bw-dock"
+  },
+  {
+    title: "STICKY NOTES",
+    text: "Click STICKY+ to create colorful notes. Drag them by the top bar and drop them anywhere on your desk!",
+    selector: "#stickyLayer"
+  },
+  {
+    title: "THE CLOCK",
+    text: "Drag the clock anywhere you like. Double-click to reset its position. Switch between digital and analog in Settings.",
+    selector: "#clockWidget"
+  }
+];
+var currentStep = 0;
+var overlay = null;
+var prevHighlight = null;
+function highlightEl(selector) {
+  prevHighlight?.classList.remove("tutorial-highlight");
+  const el = document.querySelector(selector);
+  if (el) {
+    el.classList.add("tutorial-highlight");
+    prevHighlight = el;
+  }
+}
+function clearHighlight() {
+  prevHighlight?.classList.remove("tutorial-highlight");
+  prevHighlight = null;
+}
+function renderStep() {
+  if (!overlay) return;
+  const step = STEPS[currentStep];
+  const total = STEPS.length;
+  overlay.innerHTML = `
+    <div class="tutorial-box">
+      <div class="tutorial-header">
+        <span class="tutorial-counter">// ${currentStep + 1}/${total}</span>
+        <button class="tutorial-close">\xD7</button>
+      </div>
+      <div class="tutorial-title">${step.title}</div>
+      <div class="tutorial-text">${step.text}</div>
+      <div class="tutorial-nav">
+        <button class="btn-cancel tutorial-back" ${currentStep === 0 ? "disabled" : ""}>BACK</button>
+        <button class="btn-add tutorial-next">${currentStep === total - 1 ? "DONE" : "NEXT"}</button>
+      </div>
+    </div>`;
+  overlay.querySelector(".tutorial-close").addEventListener("click", closeTutorial);
+  overlay.querySelector(".tutorial-back").addEventListener("click", () => {
+    if (currentStep > 0) {
+      currentStep--;
+      renderStep();
+    }
+  });
+  overlay.querySelector(".tutorial-next").addEventListener("click", () => {
+    if (currentStep < total - 1) {
+      currentStep++;
+      renderStep();
+    } else closeTutorial();
+  });
+  highlightEl(step.selector);
+}
+function openTutorial() {
+  currentStep = 0;
+  overlay = document.createElement("div");
+  overlay.className = "tutorial-overlay";
+  document.body.appendChild(overlay);
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closeTutorial();
+  });
+  requestAnimationFrame(() => {
+    overlay?.classList.add("open");
+    renderStep();
+  });
+}
+function closeTutorial() {
+  clearHighlight();
+  overlay?.remove();
+  overlay = null;
+}
+function initTutorial() {
+  document.getElementById("tutorialBtn")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    openTutorial();
+  });
+}
+
 // src/main.ts
 function init() {
   loadPrefs();
@@ -2096,6 +2211,7 @@ function init() {
   initNotes();
   initTimer();
   initSticky();
+  initTutorial();
   requestAnimationFrame(() => {
     applyBg(prefs.bg);
     applyPanelOpacity(prefs.opacity);

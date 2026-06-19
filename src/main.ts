@@ -12,6 +12,7 @@ import { initTodo } from "./modules/todo";
 import { initNotes } from "./modules/notes";
 import { initTimer } from "./modules/timer";
 import { initSticky } from "./modules/sticky";
+import { initTutorial } from "./modules/tutorial";
 
 function init(): void {
   loadPrefs();
@@ -33,6 +34,7 @@ function init(): void {
   initNotes();
   initTimer();
   initSticky();
+  initTutorial();
 
   requestAnimationFrame(() => {
     applyBg(prefs.bg);
