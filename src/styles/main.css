@@ -625,12 +625,11 @@ body {
 .tutorial-btn { border-left: none !important; font-size: 10px !important; padding: 0 12px !important; }
 .tutorial-overlay {
   position: fixed; inset: 0; background: rgba(10, 10, 10, .82);
-  display: flex; align-items: center; justify-content: center;
   z-index: 500; opacity: 0; transition: opacity .2s;
 }
 .tutorial-overlay.open { opacity: 1; }
 .tutorial-box {
-  background: var(--bg); border: var(--px) solid var(--border);
+  position: fixed; background: var(--bg); border: var(--px) solid var(--border);
   padding: 24px 28px; width: 380px; max-width: 92vw;
   display: flex; flex-direction: column; gap: 14px;
   z-index: 501;

@@ -2134,6 +2134,45 @@ function clearHighlight() {
   prevHighlight?.classList.remove("tutorial-highlight");
   prevHighlight = null;
 }
+function positionBox(box, selector) {
+  const target = document.querySelector(selector);
+  if (!target) {
+    box.style.cssText = "";
+    return;
+  }
+  const r = target.getBoundingClientRect();
+  const bw = 380;
+  const bh = box.offsetHeight || 260;
+  const gap = 16;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  let left;
+  let top;
+  const spaceRight = vw - r.right;
+  const spaceLeft = r.left;
+  const spaceBelow = vh - r.bottom;
+  const spaceAbove = r.top;
+  if (spaceRight >= bw + gap) {
+    left = r.right + gap;
+    top = Math.max(gap, Math.min(vh - bh - gap, r.top));
+  } else if (spaceLeft >= bw + gap) {
+    left = r.left - bw - gap;
+    top = Math.max(gap, Math.min(vh - bh - gap, r.top));
+  } else if (spaceBelow >= bh + gap) {
+    left = Math.max(gap, Math.min(vw - bw - gap, r.left + (r.width - bw) / 2));
+    top = r.bottom + gap;
+  } else if (spaceAbove >= bh + gap) {
+    left = Math.max(gap, Math.min(vw - bw - gap, r.left + (r.width - bw) / 2));
+    top = r.top - bh - gap;
+  } else {
+    left = Math.max(gap, (vw - bw) / 2);
+    top = Math.max(gap, (vh - bh) / 2);
+  }
+  box.style.position = "fixed";
+  box.style.left = left + "px";
+  box.style.top = top + "px";
+  box.style.margin = "0";
+}
 function renderStep() {
   if (!overlay) return;
   const step = STEPS[currentStep];
@@ -2165,6 +2204,8 @@ function renderStep() {
     } else closeTutorial();
   });
   highlightEl(step.selector);
+  const box = overlay.querySelector(".tutorial-box");
+  requestAnimationFrame(() => positionBox(box, step.selector));
 }
 function openTutorial() {
   currentStep = 0;
