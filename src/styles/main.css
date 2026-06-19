@@ -626,7 +626,7 @@ body {
   body { gap: 12px; padding-top: 50px; justify-content: flex-start; }
 
   /* Hide: wordmark, search, quicklinks, clock, date, weather, tools dock, stickies */
-  .wordmark { display: none; }
+  .wordmark { font-size: clamp(15px, 7vw, 28px); }
   .search-panel { display: none; }
   .quicklinks { display: none; }
   #clockWidget { display: none; }
